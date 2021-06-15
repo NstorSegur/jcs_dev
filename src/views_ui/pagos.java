@@ -5,10 +5,20 @@
  */
 package views_ui;
 
+import conexion_mysql.GenerarCodigo;
+import conexion_mysql.conexionMySQL;
+import conexion_mysql.servicios;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 /**
  *
@@ -24,7 +34,7 @@ public class pagos extends javax.swing.JInternalFrame {
     /**
      * Creates new form pagos
      */
-    public pagos() {
+    public pagos() throws Exception {
         initComponents();
         int x = frm_mAdmin.escritorio.getWidth() - this.getWidth();
         int y = frm_mAdmin.escritorio.getHeight() - this.getHeight();
@@ -34,10 +44,12 @@ public class pagos extends javax.swing.JInternalFrame {
         TxtFecha.setEnabled(false);
         TxtFecha.setCalendar(Fecha_actual);
         v = "v";
-        txtusuario.setVisible(true);
+        txtusuario.setVisible(false);
         labelm.setVisible(false);
         txtm.setVisible(false);
         combom();
+        cargarReferencias();
+        cargarcodigo();
     }
 
     private void combom() {
@@ -47,6 +59,76 @@ public class pagos extends javax.swing.JInternalFrame {
         txtm.addItem("4");
         txtm.addItem("5");
         txtm.addItem("6");
+    }
+
+    private void cargarReferencias() throws Exception {
+        Connection con = conexionMySQL.getConnection();
+        txtservicio.removeAllItems();
+        try {
+            ps = con.prepareStatement("SELECT * FROM servicios;");
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                txtservicio.addItem(rs.getString("Nombre"));
+
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(null, "Error al extraer");
+        }
+    }
+
+    void cargarcodigo() throws Exception {
+        Connection con = conexionMySQL.getConnection();
+
+        int j;
+        String num = "";
+        String c = "";
+        String SQL = "select max(referencia) from pagos";
+        try {
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(SQL);
+            if (rs.next()) {
+                c = rs.getString(1);
+            }
+
+            if (c == null) {
+                txtreferencia.setText("RP000001");
+            } else {
+                char r1 = c.charAt(2);
+                char r2 = c.charAt(3);
+                char r3 = c.charAt(4);
+                char r4 = c.charAt(5);
+                char r5 = c.charAt(6);
+                char r6 = c.charAt(7);
+                String r = "";
+                r = "" + r1 + r2 + r3 + r4 + r5 + r6;
+
+                j = Integer.parseInt(r);
+                GenerarCodigo gen = new GenerarCodigo();
+                gen.generar(j);
+                txtreferencia.setText("RP" + gen.serie());
+
+            }
+
+        } catch (Exception e) {
+        }
+    }
+
+    private void costos() {
+        servicios serv = new servicios();
+        try {
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("SELECT * FROM jcsdb.servicios WHERE Nombre = ?");
+            ps.setString(1, (String) txtservicio.getSelectedItem());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                serv.cvreferencia = rs.getString("referencia");
+                serv.cvCosto = rs.getString("costo");
+            } else {
+                JOptionPane.showMessageDialog(null, "No Existe servicio");
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }
 
     /**
@@ -73,12 +155,8 @@ public class pagos extends javax.swing.JInternalFrame {
         BTNCANCELA = new javax.swing.JButton();
         TxtFecha = new com.toedter.calendar.JDateChooser();
         jPanel4 = new javax.swing.JPanel();
-        jLabel9 = new javax.swing.JLabel();
-        TxtStock = new javax.swing.JTextField();
-        label = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
-        TxtPreVenta = new javax.swing.JTextField();
-        TxtCodProducto1 = new javax.swing.JComboBox();
+        txtservicio = new javax.swing.JComboBox();
         jLabel6 = new javax.swing.JLabel();
         txtreferencia = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
@@ -93,7 +171,7 @@ public class pagos extends javax.swing.JInternalFrame {
 
         setClosable(true);
         setTitle("Pagos");
-        setPreferredSize(new java.awt.Dimension(690, 410));
+        setPreferredSize(new java.awt.Dimension(760, 410));
         setVisible(true);
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
@@ -209,44 +287,17 @@ public class pagos extends javax.swing.JInternalFrame {
         TxtFecha.setDateFormatString("yyyy/MM/dd");
         TxtFecha.setInheritsPopupMenu(true);
 
-        jLabel9.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel9.setText("Nombre ");
-
-        TxtStock.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
-        TxtStock.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        TxtStock.setSelectedTextColor(new java.awt.Color(0, 0, 0));
-        TxtStock.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TxtStockActionPerformed(evt);
-            }
-        });
-        TxtStock.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                TxtStockKeyTyped(evt);
-            }
-        });
-
-        label.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        label.setText("Costo");
-
         jLabel8.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel8.setText("Referencia servicio");
 
-        TxtPreVenta.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
-        TxtPreVenta.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TxtPreVentaActionPerformed(evt);
+        txtservicio.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                txtservicioItemStateChanged(evt);
             }
         });
-        TxtPreVenta.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                TxtPreVentaKeyTyped(evt);
-            }
-        });
-
-        TxtCodProducto1.addActionListener(new java.awt.event.ActionListener() {
+        txtservicio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TxtCodProducto1ActionPerformed(evt);
+                txtservicioActionPerformed(evt);
             }
         });
 
@@ -259,24 +310,10 @@ public class pagos extends javax.swing.JInternalFrame {
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel4Layout.createSequentialGroup()
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel8)
-                            .addComponent(TxtPreVenta, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(21, 21, 21)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(TxtCodProducto1, 0, 130, Short.MAX_VALUE)
-                            .addGroup(jPanel4Layout.createSequentialGroup()
-                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 109, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addGap(21, 21, 21)
-                        .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(label, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(TxtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel4Layout.createSequentialGroup()
-                        .addComponent(jLabel6)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                    .addComponent(jLabel8)
+                    .addComponent(jLabel6)
+                    .addComponent(txtservicio, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -284,15 +321,9 @@ public class pagos extends javax.swing.JInternalFrame {
                 .addContainerGap(7, Short.MAX_VALUE)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
-                    .addComponent(jLabel9)
-                    .addComponent(label))
+                .addComponent(jLabel8)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(TxtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TxtPreVenta, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TxtCodProducto1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(txtservicio, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(8, 8, 8))
         );
 
@@ -403,12 +434,10 @@ public class pagos extends javax.swing.JInternalFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(BTNCANCELA)
                 .addGap(20, 20, 20))
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addGap(21, 21, 21)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 638, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -425,8 +454,8 @@ public class pagos extends javax.swing.JInternalFrame {
                                 .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 9, Short.MAX_VALUE)
+                                .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -440,8 +469,8 @@ public class pagos extends javax.swing.JInternalFrame {
                                     .addComponent(jLabel10)))
                             .addGroup(layout.createSequentialGroup()
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(txtusuario, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(15, Short.MAX_VALUE))))
+                                .addComponent(txtusuario, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addGap(22, 22, 22))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -518,8 +547,8 @@ public class pagos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_BTNGUARDARActionPerformed
 
     private void TxtClaveUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtClaveUsuarioActionPerformed
-        
-        
+
+
     }//GEN-LAST:event_TxtClaveUsuarioActionPerformed
 
     private void TxtClaveUsuarioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TxtClaveUsuarioKeyTyped
@@ -528,16 +557,21 @@ public class pagos extends javax.swing.JInternalFrame {
 
     private void BTNCANCELAActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BTNCANCELAActionPerformed
 
+        try {
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("DELETE FROM pagos WHERE referencia=?");
+            ps.setInt(1, Integer.parseInt(txtreferencia.getText()));
+            int res = ps.executeUpdate();
+            if (res > 0) {
+                JOptionPane.showMessageDialog(null, "Pago Cancelada");
+            } else {
+                JOptionPane.showMessageDialog(null, "Error Al cancelar");
 
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }//GEN-LAST:event_BTNCANCELAActionPerformed
-
-    private void TxtStockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtStockActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_TxtStockActionPerformed
-
-    private void TxtStockKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TxtStockKeyTyped
-        // TODO add your handling code here:
-    }//GEN-LAST:event_TxtStockKeyTyped
 
     private void TxtCantidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtCantidadActionPerformed
         // TODO add your handling code here:
@@ -556,25 +590,25 @@ public class pagos extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_TxtCantidadKeyTyped
 
-    private void TxtPreVentaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtPreVentaActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_TxtPreVentaActionPerformed
-
-    private void TxtPreVentaKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TxtPreVentaKeyTyped
-        char tecla = evt.getKeyChar();
-        if (((tecla < '0') || (tecla > '9'))) {
-            evt.consume();
-        }
-        if (TxtPreVenta.getText().length() >= 5) {
-            evt.consume();
-
-        }
-
-        // TODO add your handling code here:
-    }//GEN-LAST:event_TxtPreVentaKeyTyped
-
     private void BtnAgregarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAgregarPActionPerformed
+        try {
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
+            ps.setString(1, txtreferencia.getText());
+            ps.setString(2, txtusuario.getText());
+            ps.setString(3, TxtClaveUsuario.getText());
+            ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+            int res = ps.executeUpdate();
 
+            if (res > 0) {
+                JOptionPane.showMessageDialog(null, "Usuario registrado exitosamente");
+            } else {
+                JOptionPane.showMessageDialog(null, "El Usuario no fue registrado correctamente");
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+
+        }
     }//GEN-LAST:event_BtnAgregarPActionPerformed
 
     private void BtnEliminarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEliminarPActionPerformed
@@ -596,9 +630,9 @@ public class pagos extends javax.swing.JInternalFrame {
         }        // TODO add your handling code here:
     }//GEN-LAST:event_txtreferenciaKeyTyped
 
-    private void TxtCodProducto1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtCodProducto1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_TxtCodProducto1ActionPerformed
+    private void txtservicioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtservicioActionPerformed
+
+    }//GEN-LAST:event_txtservicioActionPerformed
 
     private void txtmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtmActionPerformed
         // TODO add your handling code here:
@@ -608,11 +642,17 @@ public class pagos extends javax.swing.JInternalFrame {
         if (jRadioButton1.isSelected() == true) {
             labelm.setVisible(true);
             txtm.setVisible(true);
+
         } else {
             labelm.setVisible(false);
             txtm.setVisible(false);
+
         }
     }//GEN-LAST:event_jRadioButton1ActionPerformed
+
+    private void txtservicioItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_txtservicioItemStateChanged
+
+    }//GEN-LAST:event_txtservicioItemStateChanged
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -623,10 +663,7 @@ public class pagos extends javax.swing.JInternalFrame {
     private javax.swing.JTextField TxtCantidad;
     private javax.swing.JTextField TxtCantidadArt;
     private javax.swing.JTextField TxtClaveUsuario;
-    private javax.swing.JComboBox TxtCodProducto1;
     private com.toedter.calendar.JDateChooser TxtFecha;
-    private javax.swing.JTextField TxtPreVenta;
-    private javax.swing.JTextField TxtStock;
     private javax.swing.JTextField TxtTotal;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel13;
@@ -637,16 +674,15 @@ public class pagos extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
-    private javax.swing.JLabel label;
     private javax.swing.JLabel labelm;
     private javax.swing.JComboBox txtm;
     private javax.swing.JTextField txtreferencia;
+    private javax.swing.JComboBox txtservicio;
     public static javax.swing.JTextField txtusuario;
     // End of variables declaration//GEN-END:variables
 }

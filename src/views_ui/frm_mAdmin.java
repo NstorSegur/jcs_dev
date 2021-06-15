@@ -2,6 +2,8 @@ package views_ui;
 
 import conexion_mysql.loginSession;
 import static conexion_mysql.loginSession.adminID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static views_ui.frm_mAdmin.v;
 
 /**
@@ -303,7 +305,12 @@ public class frm_mAdmin extends javax.swing.JFrame {
 
         String v = pagos.v;
         if (v == null) {
-            pagos pag = new pagos();
+            pagos pag = null;
+            try {
+                pag = new pagos();
+            } catch (Exception ex) {
+                Logger.getLogger(frm_mAdmin.class.getName()).log(Level.SEVERE, null, ex);
+            }
             escritorio.add(pag);
             pag.toFront();
             pag.setVisible(true);
@@ -387,6 +394,8 @@ public class frm_mAdmin extends javax.swing.JFrame {
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
             java.util.logging.Logger.getLogger(frm_mAdmin.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
