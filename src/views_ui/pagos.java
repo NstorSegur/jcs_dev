@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -50,6 +51,7 @@ public class pagos extends javax.swing.JInternalFrame {
         combom();
         cargarReferencias();
         cargarcodigo();
+        cargarServicios();
     }
 
     private void combom() {
@@ -122,6 +124,7 @@ public class pagos extends javax.swing.JInternalFrame {
             rs = ps.executeQuery();
             if (rs.next()) {
                 serv.cvreferencia = rs.getString("referencia");
+                serv.cvNombre = rs.getString("Nombre");
                 serv.cvCosto = rs.getString("costo");
             } else {
                 JOptionPane.showMessageDialog(null, "No Existe servicio");
@@ -131,6 +134,52 @@ public class pagos extends javax.swing.JInternalFrame {
         }
     }
 
+    private void cargarServicios() throws Exception {
+        Connection con = conexionMySQL.getConnection();
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("Servicio");
+        modelo.addColumn("Nombre");
+        modelo.addColumn("Costo");
+        String[] datos = new String[3];
+        try {
+            ps = con.prepareStatement("SELECT referencia_s, nombre, costo FROM s_pagos where referencia_p = ?;");
+            ps.setString(1, txtreferencia.getText());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                jTable1.setModel(modelo);
+                datos[0] = rs.getString(1);
+                datos[1] = rs.getString(2);
+                datos[2] = rs.getString(3);
+                modelo.addRow(datos);
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+
+    private void inserServicio() throws Exception {
+         costos();
+         Connection con = conexionMySQL.getConnection();
+            try {
+                servicios serv = new servicios();
+                ps = con.prepareStatement("INSERT INTO `s_pagos` (`referencia_p`, `referencia_s`, `nombre`, `costo`) VALUES (? , ?, ?, ?);");
+                ps.setString(1, txtreferencia.getText());
+                ps.setString(2, serv.cvreferencia);
+                ps.setString(3, serv.cvNombre);
+                ps.setString(4, serv.cvCosto);
+                ps.executeUpdate();
+
+                JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+
+                cargarServicios();
+            } catch (SQLException sqle) {
+                JOptionPane.showMessageDialog(null, "No se agrego servicio");
+            }
+    }
+
+    private void deleteServicio(){
+        
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -598,21 +647,20 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.setString(2, txtusuario.getText());
             ps.setString(3, TxtClaveUsuario.getText());
             ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
-            int res = ps.executeUpdate();
-
-            if (res > 0) {
-                JOptionPane.showMessageDialog(null, "Usuario registrado exitosamente");
-            } else {
-                JOptionPane.showMessageDialog(null, "El Usuario no fue registrado correctamente");
-            }
+            ps.executeUpdate();
+                inserServicio();
         } catch (Exception e) {
-            System.err.println(e);
-
+            try {
+                inserServicio();
+            } catch (Exception ex) {
+                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
         }
     }//GEN-LAST:event_BtnAgregarPActionPerformed
 
     private void BtnEliminarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEliminarPActionPerformed
-
+/*https://www.youtube.com/watch?v=0Lxl1m1APGk&ab_channel=Ingenier%C3%ADadeSistemas*/
     }//GEN-LAST:event_BtnEliminarPActionPerformed
 
     private void txtreferenciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtreferenciaActionPerformed
