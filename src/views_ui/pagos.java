@@ -152,34 +152,43 @@ public class pagos extends javax.swing.JInternalFrame {
                 datos[2] = rs.getString(3);
                 modelo.addRow(datos);
             }
+            try {
+                ps = con.prepareStatement("SELECT sum(costo) as Total FROM jcsdb.s_pagos WHERE referencia_p = ?;");
+                ps.setString(1, txtreferencia.getText());
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    TxtTotal.setText(rs.getString("Total"));
+                }
+            } catch (Exception e) {
+                System.err.println(e);
+            }
         } catch (Exception e) {
             System.err.println(e);
         }
     }
 
     private void inserServicio() throws Exception {
-         costos();
-         Connection con = conexionMySQL.getConnection();
-            try {
-                servicios serv = new servicios();
-                ps = con.prepareStatement("INSERT INTO `s_pagos` (`referencia_p`, `referencia_s`, `nombre`, `costo`) VALUES (? , ?, ?, ?);");
-                ps.setString(1, txtreferencia.getText());
-                ps.setString(2, serv.cvreferencia);
-                ps.setString(3, serv.cvNombre);
-                ps.setString(4, serv.cvCosto);
-                ps.executeUpdate();
-
-                JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
-
-                cargarServicios();
-            } catch (SQLException sqle) {
-                JOptionPane.showMessageDialog(null, "No se agrego servicio");
-            }
+        costos();
+        Connection con = conexionMySQL.getConnection();
+        try {
+            servicios serv = new servicios();
+            ps = con.prepareStatement("INSERT INTO `s_pagos` (`referencia_p`, `referencia_s`, `nombre`, `costo`) VALUES (? , ?, ?, ?);");
+            ps.setString(1, txtreferencia.getText());
+            ps.setString(2, serv.cvreferencia);
+            ps.setString(3, serv.cvNombre);
+            ps.setString(4, serv.cvCosto);
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+            cargarServicios();
+        } catch (SQLException sqle) {
+            JOptionPane.showMessageDialog(null, "No se agrego servicio");
+        }
     }
 
-    private void deleteServicio(){
-        
+    private void deleteServicio() {
+
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -195,9 +204,7 @@ public class pagos extends javax.swing.JInternalFrame {
         jLabel3 = new javax.swing.JLabel();
         TxtTotal = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
         jLabel14 = new javax.swing.JLabel();
-        TxtCantidadArt = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         BTNGUARDAR = new javax.swing.JButton();
         TxtClaveUsuario = new javax.swing.JTextField();
@@ -280,24 +287,8 @@ public class pagos extends javax.swing.JInternalFrame {
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel4.setText("Clave del alumno");
 
-        jLabel15.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel15.setText("N. servicios");
-
         jLabel14.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel14.setText("Fecha ");
-
-        TxtCantidadArt.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        TxtCantidadArt.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
-        TxtCantidadArt.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TxtCantidadArtActionPerformed(evt);
-            }
-        });
-        TxtCantidadArt.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyTyped(java.awt.event.KeyEvent evt) {
-                TxtCantidadArtKeyTyped(evt);
-            }
-        });
 
         jLabel2.setBackground(new java.awt.Color(69, 73, 74));
         jLabel2.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
@@ -362,7 +353,7 @@ public class pagos extends javax.swing.JInternalFrame {
                     .addComponent(jLabel8)
                     .addComponent(jLabel6)
                     .addComponent(txtservicio, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(112, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -471,10 +462,6 @@ public class pagos extends javax.swing.JInternalFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel15)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(TxtCantidadArt, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLabel13)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(TxtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -548,7 +535,7 @@ public class pagos extends javax.swing.JInternalFrame {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(BtnAgregarP, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -559,8 +546,6 @@ public class pagos extends javax.swing.JInternalFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(TxtTotal, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel15)
-                    .addComponent(TxtCantidadArt, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(BTNCANCELA)
                     .addComponent(BTNGUARDAR))
                 .addGap(18, 18, 18))
@@ -582,17 +567,10 @@ public class pagos extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_TxtTotalKeyTyped
 
-    private void TxtCantidadArtActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtCantidadArtActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_TxtCantidadArtActionPerformed
-
-    private void TxtCantidadArtKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TxtCantidadArtKeyTyped
-        // TODO add your handling code here:
-    }//GEN-LAST:event_TxtCantidadArtKeyTyped
-
     private void BTNGUARDARActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BTNGUARDARActionPerformed
-
-
+        JOptionPane.showMessageDialog(null, "EL pago se ha realizado de manera exitoza");
+        v = null;
+        dispose();
     }//GEN-LAST:event_BTNGUARDARActionPerformed
 
     private void TxtClaveUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtClaveUsuarioActionPerformed
@@ -609,12 +587,14 @@ public class pagos extends javax.swing.JInternalFrame {
         try {
             Connection con = conexionMySQL.getConnection();
             ps = con.prepareStatement("DELETE FROM pagos WHERE referencia=?");
-            ps.setInt(1, Integer.parseInt(txtreferencia.getText()));
+            ps.setString(1, txtreferencia.getText());
             int res = ps.executeUpdate();
             if (res > 0) {
-                JOptionPane.showMessageDialog(null, "Pago Cancelada");
+                JOptionPane.showMessageDialog(null, "Pago Cancelado");
+                v = null;
+                dispose();
             } else {
-                JOptionPane.showMessageDialog(null, "Error Al cancelar");
+                JOptionPane.showMessageDialog(null, "Error al cancelar");
 
             }
         } catch (Exception e) {
@@ -648,19 +628,33 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.setString(3, TxtClaveUsuario.getText());
             ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
             ps.executeUpdate();
-                inserServicio();
+            inserServicio();
         } catch (Exception e) {
             try {
                 inserServicio();
             } catch (Exception ex) {
                 Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
             }
-            
+
         }
     }//GEN-LAST:event_BtnAgregarPActionPerformed
 
     private void BtnEliminarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEliminarPActionPerformed
-/*https://www.youtube.com/watch?v=0Lxl1m1APGk&ab_channel=Ingenier%C3%ADadeSistemas*/
+        try {
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("DELETE FROM `s_pagos` WHERE (referencia_p = ? and referencia_s = ?);");
+            ps.setString(1, txtreferencia.getText());
+            ps.setString(2, (String) jTable1.getValueAt(jTable1.getSelectedRow(), 0));
+            int res = ps.executeUpdate();
+            if (res > 0) {
+                JOptionPane.showMessageDialog(null, "Servicio eliminado ");
+                cargarServicios();
+            } else {
+                JOptionPane.showMessageDialog(null, "Los cambios no se realizaron de manera correcta");
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
     }//GEN-LAST:event_BtnEliminarPActionPerformed
 
     private void txtreferenciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtreferenciaActionPerformed
@@ -709,14 +703,12 @@ public class pagos extends javax.swing.JInternalFrame {
     private javax.swing.JButton BtnAgregarP;
     private javax.swing.JButton BtnEliminarP;
     private javax.swing.JTextField TxtCantidad;
-    private javax.swing.JTextField TxtCantidadArt;
     private javax.swing.JTextField TxtClaveUsuario;
     private com.toedter.calendar.JDateChooser TxtFecha;
     private javax.swing.JTextField TxtTotal;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;

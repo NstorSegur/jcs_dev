@@ -987,7 +987,6 @@ public class alumnos extends javax.swing.JInternalFrame {
                 break;
             }
             case 3: {
-                int clave = Integer.parseInt(txtclave.getText());
                 try {
 
                     Connection con = conexionMySQL.getConnection();
