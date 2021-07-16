@@ -142,7 +142,7 @@ public class frm_mAdmin extends javax.swing.JFrame {
         );
 
         jButton4.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        jButton4.setText("Registrar usuario");
+        jButton4.setText("Registro usuarios");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
@@ -150,7 +150,7 @@ public class frm_mAdmin extends javax.swing.JFrame {
         });
 
         RegAlumnos.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        RegAlumnos.setText("Registro de alumnos");
+        RegAlumnos.setText("Registro alumnos");
         RegAlumnos.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         RegAlumnos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -159,7 +159,7 @@ public class frm_mAdmin extends javax.swing.JFrame {
         });
 
         LisAlumnos.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        LisAlumnos.setText("Lista de alumnos");
+        LisAlumnos.setText("Mensualidades");
         LisAlumnos.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         LisAlumnos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -168,7 +168,7 @@ public class frm_mAdmin extends javax.swing.JFrame {
         });
 
         RPagos.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
-        RPagos.setText("Realizar pagos");
+        RPagos.setText("Pagos");
         RPagos.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         RPagos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -202,17 +202,17 @@ public class frm_mAdmin extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(RegAlumnos, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(LisAlumnos, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(RegAlumnos, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(RegAlumnos3, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(RPagos, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(RegAlumnos2, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(LisAlumnos, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(RegAlumnos3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(RegAlumnos2, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(144, 144, 144))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -260,7 +260,7 @@ public class frm_mAdmin extends javax.swing.JFrame {
                         .addContainerGap()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(escritorio, javax.swing.GroupLayout.DEFAULT_SIZE, 866, Short.MAX_VALUE))))
+                            .addComponent(escritorio, javax.swing.GroupLayout.DEFAULT_SIZE, 1014, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -335,12 +335,12 @@ public class frm_mAdmin extends javax.swing.JFrame {
     private void LisAlumnosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LisAlumnosActionPerformed
         // TODO add your handling code here:
 
-        String v = ListaAlumnos.v;
+        String v = Mensualidades.v;
         if (v == null) {
-            ListaAlumnos lista = new ListaAlumnos();
-            escritorio.add(lista);
-            lista.toFront();
-            lista.setVisible(true);
+            Mensualidades meses = new Mensualidades();
+            escritorio.add(meses);
+            meses.toFront();
+            meses.setVisible(true);
         }
 
     }//GEN-LAST:event_LisAlumnosActionPerformed
