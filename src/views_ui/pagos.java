@@ -47,8 +47,8 @@ public class pagos extends javax.swing.JInternalFrame {
         v = "v";
         txtusuario.setVisible(false);
         labelm.setVisible(false);
-        txtm.setVisible(false);
-        Btnconfirmar.setVisible(false);
+        jcmeses.setVisible(false);
+        jbanticipo.setVisible(false);
         Txtabono.setVisible(false);
         combom();
         cargarReferencias();
@@ -57,12 +57,12 @@ public class pagos extends javax.swing.JInternalFrame {
     }
 
     private void combom() {
-        txtm.addItem("1");
-        txtm.addItem("2");
-        txtm.addItem("3");
-        txtm.addItem("4");
-        txtm.addItem("5");
-        txtm.addItem("6");
+        jcmeses.addItem("1");
+        jcmeses.addItem("2");
+        jcmeses.addItem("3");
+        jcmeses.addItem("4");
+        jcmeses.addItem("5");
+        jcmeses.addItem("6");
     }
 
     private void cargarReferencias() throws Exception {
@@ -159,7 +159,47 @@ public class pagos extends javax.swing.JInternalFrame {
                 ps.setString(1, txtreferencia.getText());
                 rs = ps.executeQuery();
                 while (rs.next()) {
-                    Txtabono.setText(rs.getString("Total"));
+                    TxtTotal1.setText(rs.getString("Total"));
+                }
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+
+    private void cargarServicios_mes() throws Exception {
+        Connection con = conexionMySQL.getConnection();
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("Servicio");
+        modelo.addColumn("Costo");
+        modelo.addColumn("Meses");
+        modelo.addColumn("Anticipo");
+        modelo.addColumn("Saldo");
+        modelo.addColumn("Mensualidad");
+        String[] datos = new String[6];
+        try {
+            ps = con.prepareStatement("SELECT nombre,costo, mensualidad,anticipo, "
+                    + "(costo - anticipo) as saldo, ((costo - anticipo)/mensualidad) as menpago FROM jcsdb.s_pagos where referencia_p = ?;");
+            ps.setString(1, txtreferencia.getText());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                jTable1.setModel(modelo);
+                datos[0] = rs.getString(1);
+                datos[1] = rs.getString(2);
+                datos[2] = rs.getString(3);
+                datos[3] = rs.getString(4);
+                datos[4] = rs.getString(5);
+                datos[5] = rs.getString(6);
+                modelo.addRow(datos);
+            }
+            try {
+                ps = con.prepareStatement("SELECT (costo - anticipo) as saldo FROM jcsdb.s_pagos WHERE referencia_p = ?;");
+                ps.setString(1, txtreferencia.getText());
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    TxtTotal1.setText(rs.getString("saldo"));
                 }
             } catch (Exception e) {
                 System.err.println(e);
@@ -182,6 +222,102 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.executeUpdate();
             JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
             cargarServicios();
+        } catch (SQLException sqle) {
+            JOptionPane.showMessageDialog(null, "No se agrego servicio");
+        }
+    }
+
+    private void inserServicio_mes() throws Exception {
+        costos();
+        Connection con = conexionMySQL.getConnection();
+        try {
+            servicios serv = new servicios();
+            ps = con.prepareStatement("INSERT INTO jcsdb.s_pagos (`referencia_p`, `referencia_s`,`Nota`,`nombre`,`costo`,`mensualidad`) "
+                    + "VALUES (?, ?, ?, ?, ?, ?);");
+            ps.setString(1, txtreferencia.getText());
+            ps.setString(2, serv.cvreferencia);
+            ps.setString(3, TxtNotas.getText());
+            ps.setString(4, serv.cvNombre);
+            ps.setString(5, serv.cvCosto);
+            int combos = jcmeses.getSelectedIndex();
+            switch (combos) {
+                case 0: {
+                    ps.setString(6, "1");
+                    break;
+                }
+                case 1: {
+                    ps.setString(6, "2");
+                    break;
+                }
+                case 2: {
+                    ps.setString(6, "3");
+                    break;
+                }
+                case 3: {
+                    ps.setString(6, "4");
+                    break;
+                }
+                case 4: {
+                    ps.setString(6, "5");
+                    break;
+                }
+                case 5: {
+                    ps.setString(6, "6");
+                    break;
+                }
+            }
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+            cargarServicios();
+        } catch (SQLException sqle) {
+            JOptionPane.showMessageDialog(null, "No se agrego servicio");
+        }
+    }
+
+    private void inserServicio_mes_anti() throws Exception {
+        costos();
+        Connection con = conexionMySQL.getConnection();
+        try {
+            servicios serv = new servicios();
+            ps = con.prepareStatement("INSERT INTO jcsdb.s_pagos (`referencia_p`,`referencia_s`,`fecha_a`,`Nota`,`nombre`,`costo`,`mensualidad`,`anticipo`) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
+            ps.setString(1, txtreferencia.getText());
+            ps.setString(2, serv.cvreferencia);
+            ps.setString(3, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+            ps.setString(4, TxtNotas.getText());
+            ps.setString(5, serv.cvNombre);
+            ps.setString(6, serv.cvCosto);
+            int combos = jcmeses.getSelectedIndex();
+            switch (combos) {
+                case 0: {
+                    ps.setString(7, "1");
+                    break;
+                }
+                case 1: {
+                    ps.setString(7, "2");
+                    break;
+                }
+                case 2: {
+                    ps.setString(7, "3");
+                    break;
+                }
+                case 3: {
+                    ps.setString(7, "4");
+                    break;
+                }
+                case 4: {
+                    ps.setString(7, "5");
+                    break;
+                }
+                case 5: {
+                    ps.setString(7, "6");
+                    break;
+                }
+            }
+            ps.setString(8, Txtabono.getText());
+            ps.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
+            cargarServicios_mes();
         } catch (SQLException sqle) {
             JOptionPane.showMessageDialog(null, "No se agrego servicio");
         }
@@ -226,10 +362,12 @@ public class pagos extends javax.swing.JInternalFrame {
         jPanel2 = new javax.swing.JPanel();
         jPanel1 = new javax.swing.JPanel();
         labelm = new javax.swing.JLabel();
-        txtm = new javax.swing.JComboBox();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        Btnconfirmar = new javax.swing.JRadioButton();
+        jcmeses = new javax.swing.JComboBox();
+        jbmensualidad = new javax.swing.JRadioButton();
+        jbanticipo = new javax.swing.JRadioButton();
         Txtabono = new javax.swing.JTextField();
+        TxtNotas = new javax.swing.JTextField();
+        labelm1 = new javax.swing.JLabel();
 
         jRadioButton2.setText("Mensualidad");
         jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -430,16 +568,16 @@ public class pagos extends javax.swing.JInternalFrame {
         labelm.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         labelm.setText("Meses");
 
-        txtm.addActionListener(new java.awt.event.ActionListener() {
+        jcmeses.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtmActionPerformed(evt);
+                jcmesesActionPerformed(evt);
             }
         });
 
-        jRadioButton1.setText("Mensualidad");
-        jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+        jbmensualidad.setText("Mensualidad");
+        jbmensualidad.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jRadioButton1ActionPerformed(evt);
+                jbmensualidadActionPerformed(evt);
             }
         });
 
@@ -450,30 +588,30 @@ public class pagos extends javax.swing.JInternalFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jRadioButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
+                    .addComponent(jbmensualidad, javax.swing.GroupLayout.DEFAULT_SIZE, 107, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(labelm, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(0, 13, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(txtm, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jcmeses, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addComponent(jRadioButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jbmensualidad, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(labelm)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtm, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jcmeses, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(8, Short.MAX_VALUE))
         );
 
-        Btnconfirmar.setText("Anticipo");
-        Btnconfirmar.addActionListener(new java.awt.event.ActionListener() {
+        jbanticipo.setText("Anticipo");
+        jbanticipo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                BtnconfirmarActionPerformed(evt);
+                jbanticipoActionPerformed(evt);
             }
         });
 
@@ -499,7 +637,7 @@ public class pagos extends javax.swing.JInternalFrame {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(4, 4, 4)
-                        .addComponent(Btnconfirmar)
+                        .addComponent(jbanticipo)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(Txtabono, javax.swing.GroupLayout.PREFERRED_SIZE, 199, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -509,11 +647,14 @@ public class pagos extends javax.swing.JInternalFrame {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(Btnconfirmar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jbanticipo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(Txtabono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
+
+        labelm1.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        labelm1.setText("Observaciones");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -522,18 +663,20 @@ public class pagos extends javax.swing.JInternalFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel13)
-                .addGap(124, 124, 124)
+                .addGap(18, 18, 18)
+                .addComponent(TxtTotal1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(BTNGUARDAR)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(BTNCANCELA)
                 .addGap(20, 20, 20))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGap(21, 21, 21)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jScrollPane1))
+                        .addComponent(TxtNotas, javax.swing.GroupLayout.PREFERRED_SIZE, 356, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(21, 21, 21)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -552,7 +695,9 @@ public class pagos extends javax.swing.JInternalFrame {
                                     .addComponent(jLabel3))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(labelm1, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGap(18, 18, 18)
                                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
@@ -568,11 +713,10 @@ public class pagos extends javax.swing.JInternalFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(BtnEliminarP, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addGap(25, 25, 25))
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(468, Short.MAX_VALUE)
-                    .addComponent(TxtTotal1, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(196, 196, 196)))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jScrollPane1)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -596,27 +740,28 @@ public class pagos extends javax.swing.JInternalFrame {
                         .addComponent(txtreferencia, javax.swing.GroupLayout.Alignment.LEADING))
                     .addComponent(TxtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(41, 41, 41)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(BtnAgregarP, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(BtnEliminarP, javax.swing.GroupLayout.PREFERRED_SIZE, 53, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(labelm1))
                     .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(30, 30, 30)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(TxtNotas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 87, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
                     .addComponent(BTNCANCELA)
-                    .addComponent(BTNGUARDAR))
+                    .addComponent(BTNGUARDAR)
+                    .addComponent(TxtTotal1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18))
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(483, Short.MAX_VALUE)
-                    .addComponent(TxtTotal1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGap(12, 12, 12)))
         );
 
         pack();
@@ -636,9 +781,11 @@ public class pagos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_TxtabonoKeyTyped
 
     private void BTNGUARDARActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BTNGUARDARActionPerformed
-        JOptionPane.showMessageDialog(null, "EL pago se ha realizado de manera exitoza");
+
+        JOptionPane.showMessageDialog(null, "Se ha realizado la operacion exitosamente");
         v = null;
         dispose();
+
     }//GEN-LAST:event_BTNGUARDARActionPerformed
 
     private void TxtClaveUsuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtClaveUsuarioActionPerformed
@@ -687,15 +834,41 @@ public class pagos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_TxtCantidadKeyTyped
 
     private void BtnAgregarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAgregarPActionPerformed
-        if (jRadioButton1.isSelected() == true) {
+        if (jbmensualidad.isSelected() == true && jbanticipo.isSelected() == true) {
             // solo captura los meses sin anticipo
-            
-            if (Btnconfirmar.isSelected() == true) {
-                // captura meses y captura el anticipo de servicio
-                
-            } else {
-                // captura meses pero no captura anticipo de servicio
-                
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
+                ps.setString(1, txtreferencia.getText());
+                ps.setString(2, txtusuario.getText());
+                ps.setString(3, TxtClaveUsuario.getText());
+                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+                ps.executeUpdate();
+                inserServicio_mes_anti();
+            } catch (Exception e) {
+                try {
+                    inserServicio_mes_anti();
+                } catch (Exception ex) {
+                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        } else if (jbmensualidad.isSelected() == true) {
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
+                ps.setString(1, txtreferencia.getText());
+                ps.setString(2, txtusuario.getText());
+                ps.setString(3, TxtClaveUsuario.getText());
+                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+                ps.executeUpdate();
+                inserServicio_mes();
+            } catch (Exception e) {
+                try {
+                    inserServicio_mes();
+                } catch (Exception ex) {
+                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         } else {
             // se paga a contado
@@ -718,6 +891,26 @@ public class pagos extends javax.swing.JInternalFrame {
             }
         }
 
+        /* if (jbanticipo.isSelected() == true) {
+            // captura meses y captura el anticipo de servicio 
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
+                ps.setString(1, txtreferencia.getText());
+                ps.setString(2, txtusuario.getText());
+                ps.setString(3, TxtClaveUsuario.getText());
+                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+                ps.executeUpdate();
+                inserServicio_mes_anti();
+            } catch (Exception e) {
+                try {
+                    inserServicio_mes_anti();
+                } catch (Exception ex) {
+                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+         */
     }//GEN-LAST:event_BtnAgregarPActionPerformed
 
     private void BtnEliminarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEliminarPActionPerformed
@@ -732,6 +925,7 @@ public class pagos extends javax.swing.JInternalFrame {
                 cargarServicios();
             } else {
                 JOptionPane.showMessageDialog(null, "Los cambios no se realizaron de manera correcta");
+                cargarServicios();
             }
         } catch (Exception e) {
             System.err.println(e);
@@ -757,23 +951,23 @@ public class pagos extends javax.swing.JInternalFrame {
 
     }//GEN-LAST:event_txtservicioActionPerformed
 
-    private void txtmActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtmActionPerformed
+    private void jcmesesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcmesesActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtmActionPerformed
+    }//GEN-LAST:event_jcmesesActionPerformed
 
-    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
-        if (jRadioButton1.isSelected() == true) {
+    private void jbmensualidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbmensualidadActionPerformed
+        if (jbmensualidad.isSelected() == true) {
             labelm.setVisible(true);
-            txtm.setVisible(true);
-            Btnconfirmar.setVisible(true);
+            jcmeses.setVisible(true);
+            jbanticipo.setVisible(true);
 
         } else {
             labelm.setVisible(false);
-            txtm.setVisible(false);
-            Btnconfirmar.setVisible(false);
+            jcmeses.setVisible(false);
+            jbanticipo.setVisible(false);
 
         }
-    }//GEN-LAST:event_jRadioButton1ActionPerformed
+    }//GEN-LAST:event_jbmensualidadActionPerformed
 
     private void txtservicioItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_txtservicioItemStateChanged
 
@@ -791,19 +985,19 @@ public class pagos extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jRadioButton2ActionPerformed
 
-    private void BtnconfirmarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnconfirmarActionPerformed
-        if (Btnconfirmar.isSelected() == true) {
+    private void jbanticipoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jbanticipoActionPerformed
+        if (jbanticipo.isSelected() == true) {
             Txtabono.setVisible(true);
             labelm.setVisible(false);
-            txtm.setVisible(false);
-            jRadioButton1.setVisible(false);
+            jcmeses.setVisible(false);
+            jbmensualidad.setVisible(false);
         } else {
             Txtabono.setVisible(false);
             labelm.setVisible(true);
-            txtm.setVisible(true);
-            jRadioButton1.setVisible(true);
+            jcmeses.setVisible(true);
+            jbmensualidad.setVisible(true);
         }
-    }//GEN-LAST:event_BtnconfirmarActionPerformed
+    }//GEN-LAST:event_jbanticipoActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -811,10 +1005,10 @@ public class pagos extends javax.swing.JInternalFrame {
     private javax.swing.JButton BTNGUARDAR;
     private javax.swing.JButton BtnAgregarP;
     private javax.swing.JButton BtnEliminarP;
-    private javax.swing.JRadioButton Btnconfirmar;
     private javax.swing.JTextField TxtCantidad;
     private javax.swing.JTextField TxtClaveUsuario;
     private com.toedter.calendar.JDateChooser TxtFecha;
+    private javax.swing.JTextField TxtNotas;
     private javax.swing.JTextField TxtTotal1;
     private javax.swing.JTextField Txtabono;
     private javax.swing.JLabel jLabel10;
@@ -828,12 +1022,14 @@ public class pagos extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel4;
-    private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JRadioButton jbanticipo;
+    private javax.swing.JRadioButton jbmensualidad;
+    private javax.swing.JComboBox jcmeses;
     private javax.swing.JLabel labelm;
-    private javax.swing.JComboBox txtm;
+    private javax.swing.JLabel labelm1;
     private javax.swing.JTextField txtreferencia;
     private javax.swing.JComboBox txtservicio;
     public static javax.swing.JTextField txtusuario;
