@@ -5,6 +5,18 @@
  */
 package views_ui;
 
+import conexion_mysql.conexionMySQL;
+import conexion_mysql.servicios;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.DecimalFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import javax.swing.JOptionPane;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author marco
@@ -12,6 +24,9 @@ package views_ui;
 public class Mensualidades extends javax.swing.JInternalFrame {
 
     public static String v;
+    Calendar Fecha_actual = new GregorianCalendar();
+    PreparedStatement ps;
+    ResultSet rs;
 
     /**
      * Creates new form Mensualidades
@@ -23,6 +38,66 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         setLocation(x / 2, y / 2);
         setVisible(true);
         v = "v";
+        TxtFecha.setEnabled(false);
+        TxtFecha.setCalendar(Fecha_actual);
+    }
+    public void vencimiento_fecha(){
+        
+    }
+    public void insertar_abono() {
+        try {
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("INSERT INTO abonos (`referencia_a`, `servicio`, `fecha`, `abono`, `nota`) VALUES (?, ?, ?, ?, ?);");
+            ps.setString(1, txtreferencia.getText());
+            ps.setString(2, txtservicio.getText());
+            ps.setString(3, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+            ps.setString(4, txtabono.getText());
+            ps.setString(5, txtnotas.getText());
+            int res = ps.executeUpdate();
+            if (res > 0) {
+                slect_spagos();
+                JOptionPane.showMessageDialog(null, "Se realizo el pago de manera correcta");
+            } else {
+                JOptionPane.showMessageDialog(null, "El pago no se realizo");
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+            JOptionPane.showMessageDialog(null, "Error del pago");
+        }
+    }
+
+    private void slect_spagos() {
+        String Costo = null;
+        String Anticipo = null;
+        try {
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("SELECT costo, anticipo FROM s_pagos where referencia_p  = ?;");
+            ps.setString(1, txtreferencia.getText());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                Costo = rs.getString("costo");
+                Anticipo = rs.getString("anticipo");
+         
+            }
+            if (Costo.equals(Anticipo)) {
+                Connection myConn = conexionMySQL.getConnection();
+                ps = myConn.prepareStatement("UPDATE pagos SET estatus = 'pagado' WHERE referencia = ?;");
+                ps.setString(1, txtreferencia.getText());
+                ps.executeUpdate();
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+    private void limpiar() {
+        DefaultTableModel modelo = new DefaultTableModel();
+        jTable1.setModel(modelo);
+        modelo.setRowCount(0);
+        TxtClaveUsuario.setText(null);
+        txtreferencia.setText(null);
+        txtservicio.setText(null);
+        txtabono.setText(null);
+        txtnotas.setText(null);
     }
 
     /**
@@ -38,19 +113,17 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jPanel1 = new javax.swing.JPanel();
         txtreferencia = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        txtreferencia2 = new javax.swing.JTextField();
+        txtservicio = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        txtreferencia5 = new javax.swing.JTextField();
+        txtabono = new javax.swing.JTextField();
         jLabel9 = new javax.swing.JLabel();
         jLabel7 = new javax.swing.JLabel();
-        txtreferencia3 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
+        txtnotas = new javax.swing.JTextField();
         jButton3 = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         TxtClaveUsuario = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
         TxtFecha = new com.toedter.calendar.JDateChooser();
 
         setClosable(true);
@@ -96,17 +169,17 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel3.setText("Referencia pago");
 
-        txtreferencia2.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
-        txtreferencia2.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtreferencia2.setSelectedTextColor(new java.awt.Color(0, 0, 0));
-        txtreferencia2.addActionListener(new java.awt.event.ActionListener() {
+        txtservicio.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
+        txtservicio.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtservicio.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        txtservicio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtreferencia2ActionPerformed(evt);
+                txtservicioActionPerformed(evt);
             }
         });
-        txtreferencia2.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtservicio.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtreferencia2KeyTyped(evt);
+                txtservicioKeyTyped(evt);
             }
         });
 
@@ -114,17 +187,17 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel6.setText("Servicio");
 
-        txtreferencia5.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
-        txtreferencia5.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtreferencia5.setSelectedTextColor(new java.awt.Color(0, 0, 0));
-        txtreferencia5.addActionListener(new java.awt.event.ActionListener() {
+        txtabono.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
+        txtabono.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtabono.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        txtabono.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtreferencia5ActionPerformed(evt);
+                txtabonoActionPerformed(evt);
             }
         });
-        txtreferencia5.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtabono.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtreferencia5KeyTyped(evt);
+                txtabonoKeyTyped(evt);
             }
         });
 
@@ -136,23 +209,26 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel7.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel7.setText("Nota");
 
-        txtreferencia3.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
-        txtreferencia3.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-        txtreferencia3.setSelectedTextColor(new java.awt.Color(0, 0, 0));
-        txtreferencia3.addActionListener(new java.awt.event.ActionListener() {
+        txtnotas.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
+        txtnotas.setDisabledTextColor(new java.awt.Color(0, 0, 0));
+        txtnotas.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        txtnotas.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtreferencia3ActionPerformed(evt);
+                txtnotasActionPerformed(evt);
             }
         });
-        txtreferencia3.addKeyListener(new java.awt.event.KeyAdapter() {
+        txtnotas.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                txtreferencia3KeyTyped(evt);
+                txtnotasKeyTyped(evt);
             }
         });
-
-        jButton2.setText("Seleccionar");
 
         jButton3.setText("Abonar");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -160,27 +236,28 @@ public class Mensualidades extends javax.swing.JInternalFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(txtreferencia3, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 98, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(txtnotas, javax.swing.GroupLayout.PREFERRED_SIZE, 384, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 99, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtreferencia, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtreferencia2, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel6))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel9)
-                            .addComponent(txtreferencia5, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jLabel7))
-                .addContainerGap(11, Short.MAX_VALUE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtreferencia, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel3))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtservicio, javax.swing.GroupLayout.PREFERRED_SIZE, 339, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel6))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel9)
+                                    .addComponent(txtabono, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel7))
+                        .addGap(0, 5, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -190,7 +267,7 @@ public class Mensualidades extends javax.swing.JInternalFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel9)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtreferencia5, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtabono, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel3)
@@ -198,33 +275,46 @@ public class Mensualidades extends javax.swing.JInternalFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(txtreferencia, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtreferencia2, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(txtservicio, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel7)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtreferencia3, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
-                .addContainerGap())
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
+                        .addComponent(txtnotas, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap())
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton3)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {},
+                {},
+                {},
+                {}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+
             }
         ));
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         TxtClaveUsuario.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         TxtClaveUsuario.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         TxtClaveUsuario.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        TxtClaveUsuario.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                TxtClaveUsuarioCaretUpdate(evt);
+            }
+        });
         TxtClaveUsuario.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 TxtClaveUsuarioActionPerformed(evt);
@@ -239,8 +329,6 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel4.setBackground(new java.awt.Color(69, 73, 74));
         jLabel4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel4.setText("Nombre del alumno");
-
-        jButton1.setText("buscar");
 
         TxtFecha.setBackground(new java.awt.Color(255, 255, 255));
         TxtFecha.setForeground(new java.awt.Color(255, 255, 255));
@@ -266,11 +354,9 @@ public class Mensualidades extends javax.swing.JInternalFrame {
                             .addComponent(jLabel4)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1)
-                                .addGap(18, 18, 18)
+                                .addGap(110, 110, 110)
                                 .addComponent(TxtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(156, Short.MAX_VALUE))
+                .addContainerGap(140, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1)
@@ -284,15 +370,13 @@ public class Mensualidades extends javax.swing.JInternalFrame {
                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(3, 3, 3)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButton1))
+                    .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(TxtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(26, 26, 26)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(43, Short.MAX_VALUE))
         );
 
         pack();
@@ -326,36 +410,99 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_TxtClaveUsuarioKeyTyped
 
-    private void txtreferencia2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtreferencia2ActionPerformed
+    private void txtservicioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtservicioActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtreferencia2ActionPerformed
+    }//GEN-LAST:event_txtservicioActionPerformed
 
-    private void txtreferencia2KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtreferencia2KeyTyped
+    private void txtservicioKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtservicioKeyTyped
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtreferencia2KeyTyped
+    }//GEN-LAST:event_txtservicioKeyTyped
 
-    private void txtreferencia3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtreferencia3ActionPerformed
+    private void txtnotasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtnotasActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtreferencia3ActionPerformed
+    }//GEN-LAST:event_txtnotasActionPerformed
 
-    private void txtreferencia3KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtreferencia3KeyTyped
+    private void txtnotasKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtnotasKeyTyped
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtreferencia3KeyTyped
+    }//GEN-LAST:event_txtnotasKeyTyped
 
-    private void txtreferencia5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtreferencia5ActionPerformed
+    private void txtabonoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtabonoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtreferencia5ActionPerformed
+    }//GEN-LAST:event_txtabonoActionPerformed
 
-    private void txtreferencia5KeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtreferencia5KeyTyped
+    private void txtabonoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtabonoKeyTyped
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtreferencia5KeyTyped
+    }//GEN-LAST:event_txtabonoKeyTyped
+
+    private void TxtClaveUsuarioCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_TxtClaveUsuarioCaretUpdate
+        String valor = TxtClaveUsuario.getText();
+        if (valor.isEmpty()) {
+
+        } else {
+            DefaultTableModel modelo = new DefaultTableModel();
+            modelo.addColumn("Referencia");
+            modelo.addColumn("Alumno");
+            modelo.addColumn("Servicio");
+            modelo.addColumn("Saldo");
+            modelo.addColumn("Mensualidad");
+            String[] datos = new String[5];
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("select pagos.referencia,alumno.nombre, servicios.Nombre,(s_pagos.costo - s_pagos.anticipo) as Saldo, \n"
+                        + "replace(FORMAT((s_pagos.costo - s_pagos.anticipo)/s_pagos.mensualidad, 2),\",\",\"\") as Mensualidad  from pagos inner join  s_pagos, alumno, servicios where "
+                        + "(pagos.clave_alum = alumno.clave and s_pagos.referencia_p = pagos.referencia and s_pagos.referencia_s = servicios.referencia) and "
+                        + "alumno.nombre like '" + valor + "%' and pagos.estatus = 'pendiente';");
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    jTable1.setModel(modelo);
+                    datos[0] = rs.getString(1);
+                    datos[1] = rs.getString(2);
+                    datos[2] = rs.getString(3);
+                    datos[3] = rs.getString(4);
+                    datos[4] = rs.getString(5);
+                    modelo.addRow(datos);
+                }
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        }
+
+    }//GEN-LAST:event_TxtClaveUsuarioCaretUpdate
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        int fila = jTable1.getSelectedRow();
+        if (fila == -1) {
+        } else {
+            txtreferencia.setText(jTable1.getValueAt(fila, 0).toString());
+            TxtClaveUsuario.setText(jTable1.getValueAt(fila, 1).toString());
+            txtservicio.setText(jTable1.getValueAt(fila, 2).toString());
+            txtabono.setText(jTable1.getValueAt(fila, 4).toString());
+        }
+    }//GEN-LAST:event_jTable1MouseClicked
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        try {
+            Connection myConn = conexionMySQL.getConnection();
+            ps = myConn.prepareStatement("UPDATE s_pagos SET costo = replace(costo,\",\",\".\") - ?, mensualidad = mensualidad - 1 WHERE referencia_p = ?;");
+            ps.setString(1, txtabono.getText());
+            ps.setString(2, txtreferencia.getText());
+            int res = ps.executeUpdate();
+            if (res > 0) {
+                insertar_abono();
+                limpiar();
+            } else {
+                JOptionPane.showMessageDialog(null, "Los datos no se aguardaron de manera correcta");
+                limpiar();
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }//GEN-LAST:event_jButton3ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField TxtClaveUsuario;
     private com.toedter.calendar.JDateChooser TxtFecha;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -366,9 +513,9 @@ public class Mensualidades extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTextField txtabono;
+    private javax.swing.JTextField txtnotas;
     private javax.swing.JTextField txtreferencia;
-    private javax.swing.JTextField txtreferencia2;
-    private javax.swing.JTextField txtreferencia3;
-    private javax.swing.JTextField txtreferencia5;
+    private javax.swing.JTextField txtservicio;
     // End of variables declaration//GEN-END:variables
 }

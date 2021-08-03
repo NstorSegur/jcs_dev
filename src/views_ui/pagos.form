@@ -92,18 +92,18 @@
                           </Group>
                       </Group>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
-                              <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Component id="TxtCantidad" min="-2" pref="49" max="-2" attributes="0"/>
-                                  <Component id="jLabel10" alignment="0" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                          </Group>
                           <Component id="txtusuario" alignment="0" min="-2" pref="78" max="-2" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="BtnAgregarP" min="-2" pref="58" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="BtnEliminarP" min="-2" pref="55" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="BtnAgregarP" min="-2" pref="49" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <Component id="BtnEliminarP" min="-2" pref="55" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Component id="TxtDescuento" min="-2" pref="49" max="-2" attributes="0"/>
+                                  <Component id="jLabel10" alignment="0" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                       </Group>
                   </Group>
@@ -135,13 +135,11 @@
                   <Component id="jLabel10" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="TxtClaveUsuario" alignment="0" max="32767" attributes="0"/>
-                      <Component id="TxtFecha" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtreferencia" alignment="0" max="32767" attributes="0"/>
-                  </Group>
-                  <Component id="TxtCantidad" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                  <Component id="TxtClaveUsuario" alignment="0" max="32767" attributes="0"/>
+                  <Component id="TxtFecha" alignment="0" max="32767" attributes="0"/>
+                  <Component id="txtreferencia" alignment="0" max="32767" attributes="0"/>
+                  <Component id="TxtDescuento" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
@@ -276,6 +274,7 @@
         </Property>
       </Properties>
       <Events>
+        <EventHandler event="caretUpdate" listener="javax.swing.event.CaretListener" parameters="javax.swing.event.CaretEvent" handler="TxtClaveUsuarioCaretUpdate"/>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="TxtClaveUsuarioActionPerformed"/>
         <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="TxtClaveUsuarioKeyTyped"/>
       </Events>
@@ -388,7 +387,7 @@
         <Property name="text" type="java.lang.String" value="Descuento %"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="TxtCantidad">
+    <Component class="javax.swing.JTextField" name="TxtDescuento">
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.SoftBevelBorderInfo">
@@ -399,8 +398,8 @@
         </Property>
       </Properties>
       <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="TxtCantidadActionPerformed"/>
-        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="TxtCantidadKeyTyped"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="TxtDescuentoActionPerformed"/>
+        <EventHandler event="keyTyped" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="TxtDescuentoKeyTyped"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="BtnEliminarP">

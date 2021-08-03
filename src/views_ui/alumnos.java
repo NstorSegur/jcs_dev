@@ -634,10 +634,7 @@ public class alumnos extends javax.swing.JInternalFrame {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "Title 1", "Title 2", "Title 3", "Title 4"
@@ -827,7 +824,11 @@ public class alumnos extends javax.swing.JInternalFrame {
                     ps.setString(13, txttelefono.getText());
                     ps.setString(14, txtemergencias.getText());
                     ps.setString(15, txtestatus.getText());
-                    ps.setString(16, txtdescuento.getText());
+                    if (txtdescuento.getText().equals("")) {
+                        ps.setString(16, "0");
+                    } else {
+                        ps.setString(16, txtdescuento.getText());
+                    }
 
                     int res = ps.executeUpdate();
                     if (res > 0) {
@@ -969,7 +970,11 @@ public class alumnos extends javax.swing.JInternalFrame {
                     ps.setString(13, txttelefono.getText());
                     ps.setString(14, txtemergencias.getText());
                     ps.setString(15, txtestatus.getText());
-                    ps.setString(16, txtdescuento.getText());
+                     if (txtdescuento.getText().equals("")) {
+                        ps.setString(16, "0");
+                    } else {
+                        ps.setString(16, txtdescuento.getText());
+                    }      
                     ps.setString(17, txtclave.getText());
                     int res = ps.executeUpdate();
                     if (res > 0) {

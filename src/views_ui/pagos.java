@@ -35,6 +35,12 @@ public class pagos extends javax.swing.JInternalFrame {
     /**
      * Creates new form pagos
      */
+    public void borrar_tabla() {
+        DefaultTableModel modelo = new DefaultTableModel();
+        jTable1.setModel(modelo);
+        modelo.setRowCount(0);
+    }
+
     public pagos() throws Exception {
         initComponents();
         int x = frm_mAdmin.escritorio.getWidth() - this.getWidth();
@@ -50,10 +56,14 @@ public class pagos extends javax.swing.JInternalFrame {
         jcmeses.setVisible(false);
         jbanticipo.setVisible(false);
         Txtabono.setVisible(false);
+        TxtDescuento.setEnabled(false);
+        TxtDescuento.setVisible(false);
+        jLabel10.setVisible(false);
         combom();
         cargarReferencias();
         cargarcodigo();
         cargarServicios();
+
     }
 
     private void combom() {
@@ -143,10 +153,12 @@ public class pagos extends javax.swing.JInternalFrame {
         modelo.addColumn("Nombre");
         modelo.addColumn("Costo");
         String[] datos = new String[3];
+
         try {
             ps = con.prepareStatement("SELECT referencia_s, nombre, costo FROM s_pagos where referencia_p = ?;");
             ps.setString(1, txtreferencia.getText());
             rs = ps.executeQuery();
+
             while (rs.next()) {
                 jTable1.setModel(modelo);
                 datos[0] = rs.getString(1);
@@ -154,15 +166,16 @@ public class pagos extends javax.swing.JInternalFrame {
                 datos[2] = rs.getString(3);
                 modelo.addRow(datos);
             }
-            try {
-                ps = con.prepareStatement("SELECT sum(costo) as Total FROM jcsdb.s_pagos WHERE referencia_p = ?;");
-                ps.setString(1, txtreferencia.getText());
-                rs = ps.executeQuery();
-                while (rs.next()) {
-                    TxtTotal1.setText(rs.getString("Total"));
-                }
-            } catch (Exception e) {
-                System.err.println(e);
+
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+        try {
+            ps = con.prepareStatement("SELECT sum(costo) as Total FROM jcsdb.s_pagos WHERE referencia_p = ?;");
+            ps.setString(1, txtreferencia.getText());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                TxtTotal1.setText(rs.getString("Total"));
             }
         } catch (Exception e) {
             System.err.println(e);
@@ -180,7 +193,7 @@ public class pagos extends javax.swing.JInternalFrame {
         modelo.addColumn("Mensualidad");
         String[] datos = new String[6];
         try {
-            ps = con.prepareStatement("SELECT nombre,costo, mensualidad,anticipo, "
+            ps = con.prepareStatement("SELECT referencia_s,costo, mensualidad,anticipo, "
                     + "(costo - anticipo) as saldo, ((costo - anticipo)/mensualidad) as menpago FROM jcsdb.s_pagos where referencia_p = ?;");
             ps.setString(1, txtreferencia.getText());
             rs = ps.executeQuery();
@@ -209,6 +222,42 @@ public class pagos extends javax.swing.JInternalFrame {
         }
     }
 
+    private void cargarServicios_m() throws Exception {
+        Connection con = conexionMySQL.getConnection();
+        DefaultTableModel modelo = new DefaultTableModel();
+        modelo.addColumn("Servicio");
+        modelo.addColumn("Costo");
+        modelo.addColumn("Meses");
+        modelo.addColumn("Mensualidad");
+        String[] datos = new String[4];
+        try {
+            ps = con.prepareStatement("SELECT referencia_s,costo, mensualidad, "
+                    + "(costo/mensualidad) as menpago FROM jcsdb.s_pagos where referencia_p = ?;");
+            ps.setString(1, txtreferencia.getText());
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                jTable1.setModel(modelo);
+                datos[0] = rs.getString(1);
+                datos[1] = rs.getString(2);
+                datos[2] = rs.getString(3);
+                datos[3] = rs.getString(4);
+                modelo.addRow(datos);
+            }
+            try {
+                ps = con.prepareStatement("SELECT costo FROM jcsdb.s_pagos WHERE referencia_p = ?;");
+                ps.setString(1, txtreferencia.getText());
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    TxtTotal1.setText(rs.getString("costo"));
+                }
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+
     private void inserServicio() throws Exception {
         costos();
         Connection con = conexionMySQL.getConnection();
@@ -218,10 +267,16 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.setString(1, txtreferencia.getText());
             ps.setString(2, serv.cvreferencia);
             ps.setString(3, serv.cvNombre);
-            ps.setString(4, serv.cvCosto);
+            if (TxtDescuento.getText().equals("0")) {
+                ps.setString(4, serv.cvCosto);
+            } else {
+                int desc = Integer.parseInt(TxtDescuento.getText());
+                ps.setInt(4, Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100);
+            }
             ps.executeUpdate();
             JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
             cargarServicios();
+            TxtNotas.setText("");
         } catch (SQLException sqle) {
             JOptionPane.showMessageDialog(null, "No se agrego servicio");
         }
@@ -232,13 +287,18 @@ public class pagos extends javax.swing.JInternalFrame {
         Connection con = conexionMySQL.getConnection();
         try {
             servicios serv = new servicios();
-            ps = con.prepareStatement("INSERT INTO jcsdb.s_pagos (`referencia_p`, `referencia_s`,`Nota`,`nombre`,`costo`,`mensualidad`) "
-                    + "VALUES (?, ?, ?, ?, ?, ?);");
+            ps = con.prepareStatement("INSERT INTO jcsdb.s_pagos (`referencia_p`, `referencia_s`,`Nota`,`nombre`,`costo`,`mensualidad`, `anticipo`) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, 0);");
             ps.setString(1, txtreferencia.getText());
             ps.setString(2, serv.cvreferencia);
             ps.setString(3, TxtNotas.getText());
             ps.setString(4, serv.cvNombre);
-            ps.setString(5, serv.cvCosto);
+            if (TxtDescuento.getText().equals("0")) {
+                ps.setString(5, serv.cvCosto);
+            } else {
+                int desc = Integer.parseInt(TxtDescuento.getText());
+                ps.setInt(5, Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100);
+            }
             int combos = jcmeses.getSelectedIndex();
             switch (combos) {
                 case 0: {
@@ -268,7 +328,8 @@ public class pagos extends javax.swing.JInternalFrame {
             }
             ps.executeUpdate();
             JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
-            cargarServicios();
+            cargarServicios_m();
+            TxtNotas.setText("");
         } catch (SQLException sqle) {
             JOptionPane.showMessageDialog(null, "No se agrego servicio");
         }
@@ -286,7 +347,12 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.setString(3, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
             ps.setString(4, TxtNotas.getText());
             ps.setString(5, serv.cvNombre);
-            ps.setString(6, serv.cvCosto);
+            if (TxtDescuento.getText().equals("0")) {
+                ps.setString(6, serv.cvCosto);
+            } else {
+                int desc = Integer.parseInt(TxtDescuento.getText());
+                ps.setInt(6, Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100);
+            }
             int combos = jcmeses.getSelectedIndex();
             switch (combos) {
                 case 0: {
@@ -318,13 +384,35 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.executeUpdate();
             JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
             cargarServicios_mes();
+            TxtNotas.setText("");
         } catch (SQLException sqle) {
             JOptionPane.showMessageDialog(null, "No se agrego servicio");
         }
     }
 
-    private void deleteServicio() {
-
+    private void servicio_desc() throws Exception {
+        servicios serv = new servicios();
+        try {
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("SELECT * FROM jcsdb.servicios WHERE Nombre = ?");
+            ps.setString(1, (String) txtservicio.getSelectedItem());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                serv.cvNombre = rs.getString("Nombre");
+            } else {
+                JOptionPane.showMessageDialog(null, "No Existe servicio");
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+        if (serv.cvNombre.equals("Colegiaturas, Servicios educativos nivel medio superior") || serv.cvNombre.equals("Reinscripcion") || serv.cvNombre.equals("Inscripcion")) {
+            TxtDescuento.setVisible(true);
+            jLabel10.setVisible(true);
+        } else {
+            TxtDescuento.setVisible(false);
+            TxtDescuento.setText("0");
+            jLabel10.setVisible(false);
+        }
     }
 
     /**
@@ -354,7 +442,7 @@ public class pagos extends javax.swing.JInternalFrame {
         jLabel6 = new javax.swing.JLabel();
         txtreferencia = new javax.swing.JTextField();
         jLabel10 = new javax.swing.JLabel();
-        TxtCantidad = new javax.swing.JTextField();
+        TxtDescuento = new javax.swing.JTextField();
         BtnEliminarP = new javax.swing.JButton();
         BtnAgregarP = new javax.swing.JButton();
         txtusuario = new javax.swing.JTextField();
@@ -442,6 +530,11 @@ public class pagos extends javax.swing.JInternalFrame {
         TxtClaveUsuario.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         TxtClaveUsuario.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         TxtClaveUsuario.setSelectedTextColor(new java.awt.Color(0, 0, 0));
+        TxtClaveUsuario.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                TxtClaveUsuarioCaretUpdate(evt);
+            }
+        });
         TxtClaveUsuario.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 TxtClaveUsuarioActionPerformed(evt);
@@ -522,15 +615,15 @@ public class pagos extends javax.swing.JInternalFrame {
         jLabel10.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel10.setText("Descuento %");
 
-        TxtCantidad.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
-        TxtCantidad.addActionListener(new java.awt.event.ActionListener() {
+        TxtDescuento.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
+        TxtDescuento.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                TxtCantidadActionPerformed(evt);
+                TxtDescuentoActionPerformed(evt);
             }
         });
-        TxtCantidad.addKeyListener(new java.awt.event.KeyAdapter() {
+        TxtDescuento.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
-                TxtCantidadKeyTyped(evt);
+                TxtDescuentoKeyTyped(evt);
             }
         });
 
@@ -702,16 +795,16 @@ public class pagos extends javax.swing.JInternalFrame {
                                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtusuario, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(9, 9, 9)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(TxtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel10)))
-                            .addComponent(txtusuario, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(BtnAgregarP, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(BtnEliminarP, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(BtnAgregarP, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(BtnEliminarP, javax.swing.GroupLayout.PREFERRED_SIZE, 55, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(TxtDescuento, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel10))))))
                 .addGap(25, 25, 25))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
@@ -733,12 +826,11 @@ public class pagos extends javax.swing.JInternalFrame {
                     .addComponent(jLabel14)
                     .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(TxtFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(txtreferencia, javax.swing.GroupLayout.Alignment.LEADING))
-                    .addComponent(TxtCantidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(TxtFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(txtreferencia, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(TxtDescuento, javax.swing.GroupLayout.Alignment.LEADING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
@@ -816,29 +908,33 @@ public class pagos extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_BTNCANCELAActionPerformed
 
-    private void TxtCantidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtCantidadActionPerformed
+    private void TxtDescuentoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TxtDescuentoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_TxtCantidadActionPerformed
+    }//GEN-LAST:event_TxtDescuentoActionPerformed
 
-    private void TxtCantidadKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TxtCantidadKeyTyped
+    private void TxtDescuentoKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_TxtDescuentoKeyTyped
         char tecla = evt.getKeyChar();
         if (((tecla < '0') || (tecla > '9'))) {
             evt.consume();
         }
-        if (TxtCantidad.getText().length() >= 2) {
+        if (TxtDescuento.getText().length() >= 2) {
             evt.consume();
 
         }
 
         // TODO add your handling code here:
-    }//GEN-LAST:event_TxtCantidadKeyTyped
+    }//GEN-LAST:event_TxtDescuentoKeyTyped
 
     private void BtnAgregarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAgregarPActionPerformed
         if (jbmensualidad.isSelected() == true && jbanticipo.isSelected() == true) {
-            // solo captura los meses sin anticipo
+            try {
+                servicio_desc();
+            } catch (Exception ex) {
+                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+            }
             try {
                 Connection con = conexionMySQL.getConnection();
-                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pendiente');");
                 ps.setString(1, txtreferencia.getText());
                 ps.setString(2, txtusuario.getText());
                 ps.setString(3, TxtClaveUsuario.getText());
@@ -852,11 +948,15 @@ public class pagos extends javax.swing.JInternalFrame {
                     Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-
         } else if (jbmensualidad.isSelected() == true) {
             try {
+                servicio_desc();
+            } catch (Exception ex) {
+                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
                 Connection con = conexionMySQL.getConnection();
-                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pendiente');");
                 ps.setString(1, txtreferencia.getText());
                 ps.setString(2, txtusuario.getText());
                 ps.setString(3, TxtClaveUsuario.getText());
@@ -873,8 +973,13 @@ public class pagos extends javax.swing.JInternalFrame {
         } else {
             // se paga a contado
             try {
+                servicio_desc();
+            } catch (Exception ex) {
+                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
                 Connection con = conexionMySQL.getConnection();
-                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pagado');");
                 ps.setString(1, txtreferencia.getText());
                 ps.setString(2, txtusuario.getText());
                 ps.setString(3, TxtClaveUsuario.getText());
@@ -890,27 +995,6 @@ public class pagos extends javax.swing.JInternalFrame {
 
             }
         }
-
-        /* if (jbanticipo.isSelected() == true) {
-            // captura meses y captura el anticipo de servicio 
-            try {
-                Connection con = conexionMySQL.getConnection();
-                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`) VALUES (?, ?, ?, ?);");
-                ps.setString(1, txtreferencia.getText());
-                ps.setString(2, txtusuario.getText());
-                ps.setString(3, TxtClaveUsuario.getText());
-                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
-                ps.executeUpdate();
-                inserServicio_mes_anti();
-            } catch (Exception e) {
-                try {
-                    inserServicio_mes_anti();
-                } catch (Exception ex) {
-                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-         */
     }//GEN-LAST:event_BtnAgregarPActionPerformed
 
     private void BtnEliminarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEliminarPActionPerformed
@@ -924,12 +1008,14 @@ public class pagos extends javax.swing.JInternalFrame {
                 JOptionPane.showMessageDialog(null, "Servicio eliminado ");
                 cargarServicios();
             } else {
-                JOptionPane.showMessageDialog(null, "Los cambios no se realizaron de manera correcta");
+                JOptionPane.showMessageDialog(null, "Ingrese servicios por cobrar");
+                borrar_tabla();
                 cargarServicios();
             }
         } catch (Exception e) {
             System.err.println(e);
         }
+
     }//GEN-LAST:event_BtnEliminarPActionPerformed
 
     private void txtreferenciaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtreferenciaActionPerformed
@@ -999,14 +1085,32 @@ public class pagos extends javax.swing.JInternalFrame {
         }
     }//GEN-LAST:event_jbanticipoActionPerformed
 
+    private void TxtClaveUsuarioCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_TxtClaveUsuarioCaretUpdate
+        String valor = TxtClaveUsuario.getText();
+        if (valor.isEmpty()) {
+            TxtDescuento.setText(null);
+        } else {
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("select descuento from jcsdb.alumno where clave = " + valor + ";");
+                rs = ps.executeQuery();
+                while (rs.next()) {
+                    TxtDescuento.setText(rs.getString("descuento"));
+                }
+            } catch (Exception e) {
+                System.err.println(e);
+            }
+        }
+    }//GEN-LAST:event_TxtClaveUsuarioCaretUpdate
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton BTNCANCELA;
     private javax.swing.JButton BTNGUARDAR;
     private javax.swing.JButton BtnAgregarP;
     private javax.swing.JButton BtnEliminarP;
-    private javax.swing.JTextField TxtCantidad;
     private javax.swing.JTextField TxtClaveUsuario;
+    private javax.swing.JTextField TxtDescuento;
     private com.toedter.calendar.JDateChooser TxtFecha;
     private javax.swing.JTextField TxtNotas;
     private javax.swing.JTextField TxtTotal1;
