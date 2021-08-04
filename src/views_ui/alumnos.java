@@ -26,6 +26,12 @@ public class alumnos extends javax.swing.JInternalFrame {
     Calendar Fecha_actual = new GregorianCalendar();
     PreparedStatement ps;
     ResultSet rs;
+    javax.swing.table.DefaultTableModel modelo = new javax.swing.table.DefaultTableModel() {
+        @Override
+        public boolean isCellEditable(int i, int i1) {
+            return false; //To change body of generated methods, choose Tools | Templates.
+        }
+    };
 
     public static String v;
 
@@ -52,7 +58,9 @@ public class alumnos extends javax.swing.JInternalFrame {
     }
 
     private void tablacarga() {
-        DefaultTableModel modelo = new DefaultTableModel();
+        //DefaultTableModel modelo= new DefaultTableModel();
+        modelo.setRowCount(0);
+        modelo.setColumnCount(0);
         modelo.addColumn("Clave");
         modelo.addColumn("Nombre");
         modelo.addColumn("Estatus");
@@ -63,7 +71,7 @@ public class alumnos extends javax.swing.JInternalFrame {
             ps = con.prepareStatement("SELECT clave, nombre, estatus, descuento FROM jcsdb.alumno;");
             rs = ps.executeQuery();
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblAlumnos.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -137,9 +145,9 @@ public class alumnos extends javax.swing.JInternalFrame {
         txtemergencias.setText(null);
         txtdescuento.setText(null);
         txtestatus.setText(null);
-        ComboS.removeAllItems();
-        ComboG.removeAllItems();
-        ComboP.removeAllItems();
+        ComboS.setSelectedIndex(0);
+        ComboG.setSelectedIndex(0);
+        ComboP.setSelectedIndex(0);
         tablacarga();
     }
 
@@ -204,7 +212,7 @@ public class alumnos extends javax.swing.JInternalFrame {
         btnBuscar = new javax.swing.JButton();
         jButton6 = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblAlumnos = new javax.swing.JTable();
 
         setClosable(true);
         setTitle("Registro de alumnos");
@@ -479,7 +487,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                         .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtdescuento, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtestatus, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addContainerGap(7, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel5Layout.setVerticalGroup(
             jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -632,7 +640,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblAlumnos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -640,7 +648,12 @@ public class alumnos extends javax.swing.JInternalFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
-        jScrollPane2.setViewportView(jTable1);
+        tblAlumnos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblAlumnosMouseClicked(evt);
+            }
+        });
+        jScrollPane2.setViewportView(tblAlumnos);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -682,7 +695,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                                 .addComponent(jLabel17)))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -692,7 +705,7 @@ public class alumnos extends javax.swing.JInternalFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 888, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 903, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -844,9 +857,9 @@ public class alumnos extends javax.swing.JInternalFrame {
                 break;
             }
             case 1: {
-                ComboS.removeAllItems();
-                ComboG.removeAllItems();
-                ComboP.removeAllItems();
+                //ComboS.removeAllItems();
+                //ComboG.removeAllItems();
+                //ComboP.removeAllItems();
                 try {
                     SimpleDateFormat fecha = new SimpleDateFormat("yyyy-mm-dd");
                     SimpleDateFormat fechap = new SimpleDateFormat("yyyy");
@@ -861,10 +874,10 @@ public class alumnos extends javax.swing.JInternalFrame {
                         txtfechan.setDate(fecha.parse(rs.getString("fechaNac")));
                         txtlugarn.setText(rs.getString("lugarNac"));
                         txtcorreo.setText(rs.getString("Correo electronico"));
-                        ComboS.addItem(rs.getString("semestre"));
-                        ComboG.addItem(rs.getString("grupo"));
+                        ComboS.setSelectedItem(rs.getString("semestre"));
+                        ComboG.setSelectedItem(rs.getString("grupo"));
                         TxtFecha.setDate(fechap.parse(rs.getString("periodoF")));
-                        ComboP.addItem(rs.getString("periodoE"));
+                        ComboP.setSelectedItem(rs.getString("periodoE"));
                         txtpt.setText(rs.getString("PaoT"));
                         txtmadre.setText(rs.getString("Madre"));
                         txtdomicilio.setText(rs.getString("domicilio"));
@@ -970,11 +983,11 @@ public class alumnos extends javax.swing.JInternalFrame {
                     ps.setString(13, txttelefono.getText());
                     ps.setString(14, txtemergencias.getText());
                     ps.setString(15, txtestatus.getText());
-                     if (txtdescuento.getText().equals("")) {
+                    if (txtdescuento.getText().equals("")) {
                         ps.setString(16, "0");
                     } else {
                         ps.setString(16, txtdescuento.getText());
-                    }      
+                    }
                     ps.setString(17, txtclave.getText());
                     int res = ps.executeUpdate();
                     if (res > 0) {
@@ -1047,7 +1060,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                     + "where estatus= 'Activo' ;");
             rs = ps.executeQuery();
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblAlumnos.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -1072,7 +1085,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                     + "where estatus= 'Baja' ;");
             rs = ps.executeQuery();
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblAlumnos.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -1101,7 +1114,7 @@ public class alumnos extends javax.swing.JInternalFrame {
             ps.setString(4, (String) ComboP1.getSelectedItem());
             rs = ps.executeQuery();
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblAlumnos.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -1126,7 +1139,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                     + "where estatus= 'Pendiente' ;");
             rs = ps.executeQuery();
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblAlumnos.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -1137,6 +1150,39 @@ public class alumnos extends javax.swing.JInternalFrame {
             System.err.println(e);
         }
     }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void tblAlumnosMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblAlumnosMouseClicked
+        try {
+            int fila = tblAlumnos.getSelectedRow();
+            String clave = (tblAlumnos.getValueAt(fila, 0).toString());
+            SimpleDateFormat fecha = new SimpleDateFormat("yyyy-mm-dd");
+            SimpleDateFormat fechap = new SimpleDateFormat("yyyy");
+            Connection con = conexionMySQL.getConnection();
+            ps = con.prepareStatement("SELECT * FROM alumno WHERE clave = ?");
+            ps.setString(1, clave);
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                txtclave.setText(rs.getString("clave"));
+                txtnombreA.setText(rs.getString("nombre"));
+                txtfechan.setDate(fecha.parse(rs.getString("fechaNac")));
+                txtlugarn.setText(rs.getString("lugarNac"));
+                txtcorreo.setText(rs.getString("Correo electronico"));
+                ComboS.setSelectedItem(rs.getString("semestre"));
+                ComboG.setSelectedItem(rs.getString("grupo"));
+                TxtFecha.setDate(fechap.parse(rs.getString("periodoF")));
+                ComboP.setSelectedItem(rs.getString("periodoE"));
+                txtpt.setText(rs.getString("PaoT"));
+                txtmadre.setText(rs.getString("Madre"));
+                txtdomicilio.setText(rs.getString("domicilio"));
+                txttelefono.setText(rs.getString("telefono"));
+                txtemergencias.setText(rs.getString("Emergencias"));
+                txtestatus.setText(rs.getString("estatus"));
+                txtdescuento.setText(rs.getString("descuento"));
+            }
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }//GEN-LAST:event_tblAlumnosMouseClicked
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1179,8 +1225,8 @@ public class alumnos extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTable jTable1;
     private javax.swing.JComboBox<String> jcombo;
+    private javax.swing.JTable tblAlumnos;
     public static javax.swing.JTextField txtclave;
     private javax.swing.JTextField txtcorreo;
     private javax.swing.JTextField txtdescuento;

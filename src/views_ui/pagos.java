@@ -31,15 +31,22 @@ public class pagos extends javax.swing.JInternalFrame {
     Calendar Fecha_actual = new GregorianCalendar();
     PreparedStatement ps;
     ResultSet rs;
+    
+     javax.swing.table.DefaultTableModel modelo = new javax.swing.table.DefaultTableModel() {
+        @Override
+        public boolean isCellEditable(int i, int i1) {
+            return false; //To change body of generated methods, choose Tools | Templates.
+        }
+    };
 
     /**
      * Creates new form pagos
      */
-    public void borrar_tabla() {
-        DefaultTableModel modelo = new DefaultTableModel();
-        jTable1.setModel(modelo);
-        modelo.setRowCount(0);
-    }
+//    public void borrar_tabla() {
+//        DefaultTableModel modelo = new DefaultTableModel();
+//        jTable1.setModel(modelo);
+//        modelo.setRowCount(0);
+//    }
 
     public pagos() throws Exception {
         initComponents();
@@ -148,7 +155,9 @@ public class pagos extends javax.swing.JInternalFrame {
 
     private void cargarServicios() throws Exception {
         Connection con = conexionMySQL.getConnection();
-        DefaultTableModel modelo = new DefaultTableModel();
+        //DefaultTableModel modelo = new DefaultTableModel();
+        modelo.setRowCount(0);
+        modelo.setColumnCount(0);
         modelo.addColumn("Servicio");
         modelo.addColumn("Nombre");
         modelo.addColumn("Costo");
@@ -160,7 +169,7 @@ public class pagos extends javax.swing.JInternalFrame {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblServicios.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -198,7 +207,7 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.setString(1, txtreferencia.getText());
             rs = ps.executeQuery();
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblServicios.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -236,7 +245,7 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.setString(1, txtreferencia.getText());
             rs = ps.executeQuery();
             while (rs.next()) {
-                jTable1.setModel(modelo);
+                tblServicios.setModel(modelo);
                 datos[0] = rs.getString(1);
                 datos[1] = rs.getString(2);
                 datos[2] = rs.getString(3);
@@ -426,7 +435,7 @@ public class pagos extends javax.swing.JInternalFrame {
 
         jRadioButton2 = new javax.swing.JRadioButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblServicios = new javax.swing.JTable();
         jLabel13 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
@@ -486,8 +495,8 @@ public class pagos extends javax.swing.JInternalFrame {
             }
         });
 
-        jTable1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(153, 153, 153), null, null));
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblServicios.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(153, 153, 153), null, null));
+        tblServicios.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {},
                 {},
@@ -500,7 +509,7 @@ public class pagos extends javax.swing.JInternalFrame {
 
             }
         ));
-        jScrollPane1.setViewportView(jTable1);
+        jScrollPane1.setViewportView(tblServicios);
 
         jLabel13.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel13.setText("Total $");
@@ -589,7 +598,7 @@ public class pagos extends javax.swing.JInternalFrame {
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(7, Short.MAX_VALUE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jLabel6)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel8)
@@ -698,7 +707,7 @@ public class pagos extends javax.swing.JInternalFrame {
                 .addComponent(labelm)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jcmeses, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(8, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jbanticipo.setText("Anticipo");
@@ -1002,14 +1011,14 @@ public class pagos extends javax.swing.JInternalFrame {
             Connection con = conexionMySQL.getConnection();
             ps = con.prepareStatement("DELETE FROM `s_pagos` WHERE (referencia_p = ? and referencia_s = ?);");
             ps.setString(1, txtreferencia.getText());
-            ps.setString(2, (String) jTable1.getValueAt(jTable1.getSelectedRow(), 0));
+            ps.setString(2, (String) tblServicios.getValueAt(tblServicios.getSelectedRow(), 0));
             int res = ps.executeUpdate();
             if (res > 0) {
                 JOptionPane.showMessageDialog(null, "Servicio eliminado ");
                 cargarServicios();
             } else {
                 JOptionPane.showMessageDialog(null, "Ingrese servicios por cobrar");
-                borrar_tabla();
+                //borrar_tabla();
                 cargarServicios();
             }
         } catch (Exception e) {
@@ -1128,12 +1137,12 @@ public class pagos extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel4;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
     private javax.swing.JRadioButton jbanticipo;
     private javax.swing.JRadioButton jbmensualidad;
     private javax.swing.JComboBox jcmeses;
     private javax.swing.JLabel labelm;
     private javax.swing.JLabel labelm1;
+    private javax.swing.JTable tblServicios;
     private javax.swing.JTextField txtreferencia;
     private javax.swing.JComboBox txtservicio;
     public static javax.swing.JTextField txtusuario;
