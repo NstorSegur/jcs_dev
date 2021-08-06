@@ -320,10 +320,8 @@ public class frm_mAdmin extends javax.swing.JFrame {
     }//GEN-LAST:event_RPagosActionPerformed
 
     private void RegAlumnosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RegAlumnosActionPerformed
-
         String v = alumnos.v;
         if (v == null) {
-
             alumnos alum = new alumnos();
             escritorio.add(alum);
             alum.toFront();

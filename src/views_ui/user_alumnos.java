@@ -10,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.swing.JOptionPane;
-import static views_ui.alumnos.v;
 
 /**
  *
@@ -63,7 +62,7 @@ public class user_alumnos extends javax.swing.JInternalFrame {
         setClosable(true);
         setTitle("Registro de alumnos");
         setFocusTraversalPolicyProvider(true);
-        setPreferredSize(new java.awt.Dimension(300, 325));
+        setPreferredSize(new java.awt.Dimension(310, 270));
         setVisible(true);
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
@@ -111,7 +110,7 @@ public class user_alumnos extends javax.swing.JInternalFrame {
             }
         });
 
-        cb_option.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Asignar", "Modificar" }));
+        cb_option.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Asignar", "Restablecer contraseña" }));
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -124,17 +123,15 @@ public class user_alumnos extends javax.swing.JInternalFrame {
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(jLabel3)
                         .addComponent(jLabel1))
-                    .addComponent(cb_option, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cb_option, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txt_control, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txt_usuario, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(Std_pass, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(txt_control, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txt_usuario, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(Std_pass, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_aceptar)))
+                        .addComponent(btn_aceptar)
+                        .addGap(16, 16, 16)))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -164,16 +161,16 @@ public class user_alumnos extends javax.swing.JInternalFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(21, 21, 21)
+                .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(59, 59, 59)
+                .addGap(21, 21, 21)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(66, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -215,13 +212,11 @@ public class user_alumnos extends javax.swing.JInternalFrame {
             case 1: {
                 try {
                     Connection myConn = conexionMySQL.getConnection();
-                    ps = myConn.prepareStatement("UPDATE `alumno_pass` SET username = ?, password = ? WHERE IDalumno = ?;");
-                    ps.setString(1, txt_usuario.getText());
-                    ps.setString(2, Std_pass.getText());
-                    ps.setString(3, txt_control.getText());
+                    ps = myConn.prepareStatement("UPDATE alumno_pass SET password = '123456' WHERE IDalumno = ?;");                   
+                    ps.setString(1, txt_control.getText());
                     int res = ps.executeUpdate();
                     if (res > 0) {
-                        JOptionPane.showMessageDialog(null, "Se modifico correctamente el campo");
+                        JOptionPane.showMessageDialog(null, "Se asigno una contraseña temporal");
                         limpiar();
                     } else {
                         JOptionPane.showMessageDialog(null, "Los datos no se aguardaron de manera correcta");
