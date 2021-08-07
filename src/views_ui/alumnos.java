@@ -1217,6 +1217,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                 txtemergencias.setText(rs.getString("Emergencias"));
                 txtestatus.setText(rs.getString("estatus"));
                 txtdescuento.setText(rs.getString("descuento"));
+                txtsaldo.setText(rs.getString("Saldo"));
             }
         } catch (Exception e) {
             System.err.println(e);

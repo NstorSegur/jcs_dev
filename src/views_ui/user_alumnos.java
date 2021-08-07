@@ -198,10 +198,10 @@ public class user_alumnos extends javax.swing.JInternalFrame {
                     int res = ps.executeUpdate();
                     if (res > 0) {
                         JOptionPane.showMessageDialog(null, "Usuario registrado exitosamente");
-                        limpiar();
+                        this.dispose();
                     } else {
                         JOptionPane.showMessageDialog(null, "El Usuario no fue registrado correctamente");
-                        limpiar();
+                        this.dispose();
                     }
                 } catch (Exception e) {
                     System.err.println(e);
@@ -217,10 +217,10 @@ public class user_alumnos extends javax.swing.JInternalFrame {
                     int res = ps.executeUpdate();
                     if (res > 0) {
                         JOptionPane.showMessageDialog(null, "Se asigno una contraseña temporal");
-                        limpiar();
+                        this.dispose();
                     } else {
                         JOptionPane.showMessageDialog(null, "Los datos no se aguardaron de manera correcta");
-                        limpiar();
+                        this.dispose();
                     }
                 } catch (Exception e) {
                     System.err.println(e);

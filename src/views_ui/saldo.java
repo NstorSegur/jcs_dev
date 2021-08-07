@@ -32,8 +32,8 @@ public class saldo extends javax.swing.JInternalFrame {
         setVisible(true);
         v = "v";
     }
-    
-     private void limpiar() {
+
+    private void limpiar() {
         txt_control.setText(null);
         txtSaldo.setText(null);
         Std_pass.setText(null);
@@ -151,8 +151,6 @@ public class saldo extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn_aceptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_aceptarActionPerformed
-
-        JOptionPane.showMessageDialog(null, "Comprovando usuario");
         try {
             Connection con = conexionMySQL.getConnection();
             ps = con.prepareStatement("SELECT * FROM alumno_pass where IDalumno = ? and password = ?;");
@@ -160,14 +158,16 @@ public class saldo extends javax.swing.JInternalFrame {
             ps.setString(2, Std_pass.getText());
             rs = ps.executeQuery();
             if (rs.next()) {
-                JOptionPane.showMessageDialog(null, "Se ha confirmado tu usuario");
-                ps = con.prepareStatement("UPDATE alumno SET Saldo = '?' WHERE clave = ?;");
+                JOptionPane.showMessageDialog(null, "Se ha agregado tu saldo");
+
+                ps = con.prepareStatement("UPDATE alumno SET Saldo = Saldo + ? WHERE clave = ?;");
                 ps.setString(1, txtSaldo.getText());
                 ps.setString(2, txt_control.getText());
-                ps.executeUpdate();
+                ps.execute();
+                this.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "Ha ingresado datos erroneos");
-
+                Std_pass.setText(null);
             }
         } catch (Exception e) {
             System.err.println(e);
