@@ -9,6 +9,7 @@ import conexion_mysql.conexionMySQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -25,6 +26,17 @@ public class saldo extends javax.swing.JInternalFrame {
      */
     public saldo() {
         initComponents();
+        int x = frm_mAdmin.escritorio.getWidth() - this.getWidth();
+        int y = frm_mAdmin.escritorio.getHeight() - this.getHeight();
+        setLocation(x / 2, y / 2);
+        setVisible(true);
+        v = "v";
+    }
+    
+     private void limpiar() {
+        txt_control.setText(null);
+        txtSaldo.setText(null);
+        Std_pass.setText(null);
     }
 
     /**
@@ -38,7 +50,7 @@ public class saldo extends javax.swing.JInternalFrame {
 
         btn_aceptar = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
-        txt_usuario = new javax.swing.JTextField();
+        txtSaldo = new javax.swing.JTextField();
         Std_pass = new javax.swing.JPasswordField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
@@ -47,6 +59,23 @@ public class saldo extends javax.swing.JInternalFrame {
         setClosable(true);
         setTitle("Asignar saldo");
         setPreferredSize(new java.awt.Dimension(310, 270));
+        addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
+            public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosed(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameClosing(javax.swing.event.InternalFrameEvent evt) {
+                formInternalFrameClosing(evt);
+            }
+            public void internalFrameDeactivated(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameDeiconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameIconified(javax.swing.event.InternalFrameEvent evt) {
+            }
+            public void internalFrameOpened(javax.swing.event.InternalFrameEvent evt) {
+            }
+        });
 
         btn_aceptar.setText("Aceptar");
         btn_aceptar.addActionListener(new java.awt.event.ActionListener() {
@@ -58,9 +87,9 @@ public class saldo extends javax.swing.JInternalFrame {
         jLabel3.setFont(new java.awt.Font("Arial", 1, 16)); // NOI18N
         jLabel3.setText("Saldo a favor:");
 
-        txt_usuario.addActionListener(new java.awt.event.ActionListener() {
+        txtSaldo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txt_usuarioActionPerformed(evt);
+                txtSaldoActionPerformed(evt);
             }
         });
 
@@ -91,7 +120,7 @@ public class saldo extends javax.swing.JInternalFrame {
                 .addGap(39, 39, 39)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txt_control, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txt_usuario, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSaldo, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(Std_pass, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(btn_aceptar)
@@ -111,7 +140,7 @@ public class saldo extends javax.swing.JInternalFrame {
                     .addComponent(jLabel2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txt_usuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSaldo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel3))
                 .addGap(27, 27, 27)
                 .addComponent(btn_aceptar)
@@ -122,35 +151,41 @@ public class saldo extends javax.swing.JInternalFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn_aceptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_aceptarActionPerformed
-        /*
+
+        JOptionPane.showMessageDialog(null, "Comprovando usuario");
         try {
             Connection con = conexionMySQL.getConnection();
-            ps = con.prepareStatement("INSERT INTO `alumno_pass` (`IDalumno`, `username`, `password`) VALUES(?,?,?)");
+            ps = con.prepareStatement("SELECT * FROM alumno_pass where IDalumno = ? and password = ?;");
             ps.setString(1, txt_control.getText());
-            ps.setString(2, txt_usuario.getText());
-            ps.setString(3, Std_pass.getText());
-            int res = ps.executeUpdate();
-            if (res > 0) {
-                JOptionPane.showMessageDialog(null, "Usuario registrado exitosamente");
-                limpiar();
+            ps.setString(2, Std_pass.getText());
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                JOptionPane.showMessageDialog(null, "Se ha confirmado tu usuario");
+                ps = con.prepareStatement("UPDATE alumno SET Saldo = '?' WHERE clave = ?;");
+                ps.setString(1, txtSaldo.getText());
+                ps.setString(2, txt_control.getText());
+                ps.executeUpdate();
             } else {
-                JOptionPane.showMessageDialog(null, "El Usuario no fue registrado correctamente");
-                limpiar();
+                JOptionPane.showMessageDialog(null, "Ha ingresado datos erroneos");
+
             }
         } catch (Exception e) {
             System.err.println(e);
-            JOptionPane.showMessageDialog(null, "El Usuario ya existe");
         }
-*/
     }//GEN-LAST:event_btn_aceptarActionPerformed
 
-    private void txt_usuarioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_usuarioActionPerformed
+    private void txtSaldoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtSaldoActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txt_usuarioActionPerformed
+    }//GEN-LAST:event_txtSaldoActionPerformed
 
     private void txt_controlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txt_controlActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txt_controlActionPerformed
+
+    private void formInternalFrameClosing(javax.swing.event.InternalFrameEvent evt) {//GEN-FIRST:event_formInternalFrameClosing
+        // TODO add your handling code here:
+        v = null;
+    }//GEN-LAST:event_formInternalFrameClosing
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -159,7 +194,7 @@ public class saldo extends javax.swing.JInternalFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JTextField txtSaldo;
     public static javax.swing.JTextField txt_control;
-    private javax.swing.JTextField txt_usuario;
     // End of variables declaration//GEN-END:variables
 }

@@ -12,7 +12,7 @@ import com.mysql.cj.jdbc.Driver;
 public class conexionMySQL {
     
     public static Connection getConnection() throws Exception{
-        String url = "jdbc:mysql://localhost:3306/jcsdb"; 
+        String url = "jdbc:mysql://localhost:3306/jcs_db"; 
         String username = "root";
         String password = "root";
         

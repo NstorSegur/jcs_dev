@@ -23,7 +23,6 @@ import static views_ui.frm_mAdmin.escritorio;
  * @author marco
  */
 public class alumnos extends javax.swing.JInternalFrame {
-
     Calendar Fecha_actual = new GregorianCalendar();
     PreparedStatement ps;
     ResultSet rs;
@@ -532,7 +531,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                     .addComponent(jLabel7)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txttelefono, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel8))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1234,6 +1233,14 @@ public class alumnos extends javax.swing.JInternalFrame {
 
     private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
         // TODO add your handling code here:
+        String v = saldo.v;
+        if (v == null) {
+            saldo saldo = new saldo();
+            escritorio.add(saldo);
+            saldo.toFront();
+            saldo.setVisible(true);
+            saldo.txt_control.setText(txtclave.getText());
+        }
     }//GEN-LAST:event_jButton7ActionPerformed
 
 
