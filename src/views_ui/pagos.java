@@ -29,10 +29,10 @@ public class pagos extends javax.swing.JInternalFrame {
 
     public static String v;
     Calendar Fecha_actual = new GregorianCalendar();
-    PreparedStatement ps;
-    ResultSet rs;
-    
-     javax.swing.table.DefaultTableModel modelo = new javax.swing.table.DefaultTableModel() {
+    PreparedStatement ps, ps1, ps2;
+    ResultSet rs, rs1;
+
+    javax.swing.table.DefaultTableModel modelo = new javax.swing.table.DefaultTableModel() {
         @Override
         public boolean isCellEditable(int i, int i1) {
             return false; //To change body of generated methods, choose Tools | Templates.
@@ -47,7 +47,6 @@ public class pagos extends javax.swing.JInternalFrame {
 //        jTable1.setModel(modelo);
 //        modelo.setRowCount(0);
 //    }
-
     public pagos() throws Exception {
         initComponents();
         int x = frm_mAdmin.escritorio.getWidth() - this.getWidth();
@@ -203,7 +202,7 @@ public class pagos extends javax.swing.JInternalFrame {
         String[] datos = new String[6];
         try {
             ps = con.prepareStatement("SELECT referencia_s,costo, mensualidad,anticipo, "
-                    + "(costo - anticipo) as saldo, ((costo - anticipo)/mensualidad) as menpago FROM jcsdb.s_pagos where referencia_p = ?;");
+                    + "(costo - anticipo) as saldo, FORMAT(((costo - anticipo)/mensualidad),2) as menpago FROM jcsdb.s_pagos where referencia_p = ?;");
             ps.setString(1, txtreferencia.getText());
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -241,7 +240,7 @@ public class pagos extends javax.swing.JInternalFrame {
         String[] datos = new String[4];
         try {
             ps = con.prepareStatement("SELECT referencia_s,costo, mensualidad, "
-                    + "(costo/mensualidad) as menpago FROM jcsdb.s_pagos where referencia_p = ?;");
+                    + "FORMAT((costo/mensualidad),2) as menpago FROM jcsdb.s_pagos where referencia_p = ?;");
             ps.setString(1, txtreferencia.getText());
             rs = ps.executeQuery();
             while (rs.next()) {
@@ -267,6 +266,17 @@ public class pagos extends javax.swing.JInternalFrame {
         }
     }
 
+    private void saldo() throws Exception {
+        Connection con = conexionMySQL.getConnection();
+        try {
+            ps = con.prepareStatement("UPDATE alumno SET Saldo = 0 WHERE clave = ?;");
+            ps.setString(1, TxtClaveUsuario.getText());
+            ps.executeUpdate();
+        } catch (Exception e) {
+            System.err.println(e);
+        }
+    }
+
     private void inserServicio() throws Exception {
         costos();
         Connection con = conexionMySQL.getConnection();
@@ -276,11 +286,49 @@ public class pagos extends javax.swing.JInternalFrame {
             ps.setString(1, txtreferencia.getText());
             ps.setString(2, serv.cvreferencia);
             ps.setString(3, serv.cvNombre);
-            if (TxtDescuento.getText().equals("0")) {
-                ps.setString(4, serv.cvCosto);
+
+            if (jRbSaldo.isSelected() == true) {
+                if (TxtDescuento.getText().equals("0")) {
+                    int saldo = Integer.parseInt(txtSaldoUser.getText());
+                    if (saldo < Integer.parseInt(serv.cvCosto)) {
+                        ps.setInt(4, (Integer.parseInt(serv.cvCosto) - saldo));
+                        ps1 = con.prepareStatement("UPDATE alumno SET Saldo = 0 WHERE clave = ?;");
+                        ps1.setString(1, TxtClaveUsuario.getText());
+                        ps1.executeUpdate();
+                        txtSaldoUser.setText("0");
+                    } else {
+                        int opc = saldo - (Integer.parseInt(serv.cvCosto));
+                        ps.setInt(4, Integer.parseInt(serv.cvCosto));
+                        ps1 = con.prepareStatement("UPDATE alumno SET Saldo = " + opc + " WHERE clave = ?;");
+                        ps1.setString(1, TxtClaveUsuario.getText());
+                        ps1.executeUpdate();
+                        txtSaldoUser.setText("" + opc);
+                    }
+                } else {
+                    int desc = Integer.parseInt(TxtDescuento.getText());
+                    int saldo = Integer.parseInt(txtSaldoUser.getText());
+                    if (saldo < Integer.parseInt(serv.cvCosto)) {
+                        ps.setInt(4, (Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100) - saldo);
+                        ps2 = con.prepareStatement("UPDATE alumno SET Saldo = 0 WHERE clave = ?;");
+                        ps2.setString(1, TxtClaveUsuario.getText());
+                        ps2.executeUpdate();
+                        txtSaldoUser.setText("0");
+                    } else {
+                        int opc = saldo - (Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100);
+                        ps.setInt(4, Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100);
+                        ps2 = con.prepareStatement("UPDATE alumno SET Saldo = " + opc + " WHERE clave = ?;");
+                        ps2.setString(1, TxtClaveUsuario.getText());
+                        ps2.executeUpdate();
+                        txtSaldoUser.setText("" + opc);
+                    }
+                }
             } else {
-                int desc = Integer.parseInt(TxtDescuento.getText());
-                ps.setInt(4, Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100);
+                if (TxtDescuento.getText().equals("0")) {
+                    ps.setString(4, serv.cvCosto);
+                } else {
+                    int desc = Integer.parseInt(TxtDescuento.getText());
+                    ps.setInt(4, Integer.parseInt(serv.cvCosto) - (Integer.parseInt(serv.cvCosto) * desc) / 100);
+                }
             }
             ps.executeUpdate();
             JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
@@ -389,13 +437,107 @@ public class pagos extends javax.swing.JInternalFrame {
                     break;
                 }
             }
-            ps.setString(8, Txtabono.getText());
+            if (jRbSaldo.isSelected() == true) {
+                int saldo = Integer.parseInt(txtSaldoUser.getText());
+                int anticipo = Integer.parseInt(Txtabono.getText());
+                if (anticipo > saldo) {
+                    JOptionPane.showMessageDialog(null, "No cuenta con saldo suficiente");
+                    txtSaldoUser.setText("");
+                } else {
+                    int opc = saldo - anticipo;
+                    int costo = Integer.parseInt(serv.cvCosto);
+                    if (anticipo >= costo) {
+                        JOptionPane.showMessageDialog(null, "Por favor pague de contado");
+                        txtSaldoUser.setText("");
+                    } else {
+                        ps.setInt(8, anticipo);
+                        ps1 = con.prepareStatement("UPDATE alumno SET Saldo = " + opc + " WHERE clave = ?;");
+                        ps1.setString(1, TxtClaveUsuario.getText());
+                        ps1.executeUpdate();
+                        txtSaldoUser.setText("" + opc);
+                    }
+                }
+            } else {
+                ps.setString(8, Txtabono.getText());
+            }
             ps.executeUpdate();
             JOptionPane.showMessageDialog(null, "Servicio agregado", "Guardar", JOptionPane.INFORMATION_MESSAGE);
             cargarServicios_mes();
             TxtNotas.setText("");
         } catch (SQLException sqle) {
             JOptionPane.showMessageDialog(null, "No se agrego servicio");
+        }
+    }
+
+    private void agregar() {
+        if (jbmensualidad.isSelected() == true && jbanticipo.isSelected() == true) {
+            try {
+                servicio_desc();
+            } catch (Exception ex) {
+                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pendiente');");
+                ps.setString(1, txtreferencia.getText());
+                ps.setString(2, txtusuario.getText());
+                ps.setString(3, TxtClaveUsuario.getText());
+                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+                ps.executeUpdate();
+                inserServicio_mes_anti();
+            } catch (Exception e) {
+                try {
+                    inserServicio_mes_anti();
+                } catch (Exception ex) {
+                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } else if (jbmensualidad.isSelected() == true) {
+            try {
+                servicio_desc();
+            } catch (Exception ex) {
+                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pendiente');");
+                ps.setString(1, txtreferencia.getText());
+                ps.setString(2, txtusuario.getText());
+                ps.setString(3, TxtClaveUsuario.getText());
+                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+                ps.executeUpdate();
+                inserServicio_mes();
+            } catch (Exception e) {
+                try {
+                    inserServicio_mes();
+                } catch (Exception ex) {
+                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        } else {
+            // se paga a contado
+            try {
+                servicio_desc();
+            } catch (Exception ex) {
+                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            try {
+                Connection con = conexionMySQL.getConnection();
+                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pagado');");
+                ps.setString(1, txtreferencia.getText());
+                ps.setString(2, txtusuario.getText());
+                ps.setString(3, TxtClaveUsuario.getText());
+                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
+                ps.executeUpdate();
+                inserServicio();
+            } catch (Exception e) {
+                try {
+                    inserServicio();
+                } catch (Exception ex) {
+                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
         }
     }
 
@@ -467,6 +609,7 @@ public class pagos extends javax.swing.JInternalFrame {
         labelm1 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
         txtSaldoUser = new javax.swing.JTextField();
+        jRbSaldo = new javax.swing.JRadioButton();
 
         jRadioButton2.setText("Mensualidad");
         jRadioButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -477,7 +620,7 @@ public class pagos extends javax.swing.JInternalFrame {
 
         setClosable(true);
         setTitle("Pagos");
-        setPreferredSize(new java.awt.Dimension(760, 470));
+        setPreferredSize(new java.awt.Dimension(760, 490));
         setVisible(true);
         addInternalFrameListener(new javax.swing.event.InternalFrameListener() {
             public void internalFrameActivated(javax.swing.event.InternalFrameEvent evt) {
@@ -769,6 +912,8 @@ public class pagos extends javax.swing.JInternalFrame {
             }
         });
 
+        jRbSaldo.setText("Aplicar saldo");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -829,13 +974,16 @@ public class pagos extends javax.swing.JInternalFrame {
                 .addContainerGap()
                 .addComponent(jScrollPane1)
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(txtusuario, javax.swing.GroupLayout.PREFERRED_SIZE, 25, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(txtSaldoUser, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(txtSaldoUser, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jRbSaldo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18))
         );
         layout.setVerticalGroup(
@@ -847,7 +995,9 @@ public class pagos extends javax.swing.JInternalFrame {
                     .addComponent(txtSaldoUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtusuario, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(jRbSaldo))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -955,75 +1105,7 @@ public class pagos extends javax.swing.JInternalFrame {
     }//GEN-LAST:event_TxtDescuentoKeyTyped
 
     private void BtnAgregarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnAgregarPActionPerformed
-        if (jbmensualidad.isSelected() == true && jbanticipo.isSelected() == true) {
-            try {
-                servicio_desc();
-            } catch (Exception ex) {
-                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                Connection con = conexionMySQL.getConnection();
-                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pendiente');");
-                ps.setString(1, txtreferencia.getText());
-                ps.setString(2, txtusuario.getText());
-                ps.setString(3, TxtClaveUsuario.getText());
-                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
-                ps.executeUpdate();
-                inserServicio_mes_anti();
-            } catch (Exception e) {
-                try {
-                    inserServicio_mes_anti();
-                } catch (Exception ex) {
-                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        } else if (jbmensualidad.isSelected() == true) {
-            try {
-                servicio_desc();
-            } catch (Exception ex) {
-                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                Connection con = conexionMySQL.getConnection();
-                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pendiente');");
-                ps.setString(1, txtreferencia.getText());
-                ps.setString(2, txtusuario.getText());
-                ps.setString(3, TxtClaveUsuario.getText());
-                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
-                ps.executeUpdate();
-                inserServicio_mes();
-            } catch (Exception e) {
-                try {
-                    inserServicio_mes();
-                } catch (Exception ex) {
-                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        } else {
-            // se paga a contado
-            try {
-                servicio_desc();
-            } catch (Exception ex) {
-                Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                Connection con = conexionMySQL.getConnection();
-                ps = con.prepareStatement("INSERT INTO `jcsdb`.`pagos` (`referencia`, `clave_usuario`, `clave_alum`, `fecha`, `estatus`) VALUES (?, ?, ?, ?,'pagado');");
-                ps.setString(1, txtreferencia.getText());
-                ps.setString(2, txtusuario.getText());
-                ps.setString(3, TxtClaveUsuario.getText());
-                ps.setString(4, ((JTextField) TxtFecha.getDateEditor().getUiComponent()).getText());
-                ps.executeUpdate();
-                inserServicio();
-            } catch (Exception e) {
-                try {
-                    inserServicio();
-                } catch (Exception ex) {
-                    Logger.getLogger(pagos.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            }
-        }
+        agregar();
     }//GEN-LAST:event_BtnAgregarPActionPerformed
 
     private void BtnEliminarPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BtnEliminarPActionPerformed
@@ -1163,6 +1245,7 @@ public class pagos extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JRadioButton jRadioButton2;
+    private javax.swing.JRadioButton jRbSaldo;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JRadioButton jbanticipo;
     private javax.swing.JRadioButton jbmensualidad;
