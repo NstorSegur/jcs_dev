@@ -125,6 +125,8 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         TxtClaveUsuario = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         TxtFecha = new com.toedter.calendar.JDateChooser();
+        jLabel1 = new javax.swing.JLabel();
+        txtSaldoUser = new javax.swing.JTextField();
 
         setClosable(true);
         setTitle("Mensualidades");
@@ -151,7 +153,6 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel2.setFont(new java.awt.Font("Arial Black", 0, 14)); // NOI18N
         jLabel2.setText("Datos de deudor");
 
-        txtreferencia.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         txtreferencia.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtreferencia.setSelectedTextColor(new java.awt.Color(0, 0, 0));
         txtreferencia.addActionListener(new java.awt.event.ActionListener() {
@@ -169,7 +170,6 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel3.setText("Referencia pago");
 
-        txtservicio.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         txtservicio.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtservicio.setSelectedTextColor(new java.awt.Color(0, 0, 0));
         txtservicio.addActionListener(new java.awt.event.ActionListener() {
@@ -187,7 +187,6 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel6.setText("Servicio");
 
-        txtabono.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         txtabono.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtabono.setSelectedTextColor(new java.awt.Color(0, 0, 0));
         txtabono.addActionListener(new java.awt.event.ActionListener() {
@@ -209,7 +208,6 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         jLabel7.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jLabel7.setText("Nota");
 
-        txtnotas.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         txtnotas.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         txtnotas.setSelectedTextColor(new java.awt.Color(0, 0, 0));
         txtnotas.addActionListener(new java.awt.event.ActionListener() {
@@ -307,7 +305,6 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         });
         jScrollPane1.setViewportView(jTable1);
 
-        TxtClaveUsuario.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED, null, new java.awt.Color(204, 204, 204), null, null));
         TxtClaveUsuario.setDisabledTextColor(new java.awt.Color(0, 0, 0));
         TxtClaveUsuario.setSelectedTextColor(new java.awt.Color(0, 0, 0));
         TxtClaveUsuario.addCaretListener(new javax.swing.event.CaretListener() {
@@ -335,48 +332,63 @@ public class Mensualidades extends javax.swing.JInternalFrame {
         TxtFecha.setDateFormatString("yyyy/MM/dd");
         TxtFecha.setInheritsPopupMenu(true);
 
+        jLabel1.setText("Saldo:");
+
+        txtSaldoUser.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap(40, Short.MAX_VALUE)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(90, 90, 90))
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(17, 17, 17)
-                        .addComponent(jLabel2))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(100, 100, 100)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(110, 110, 110)
-                                .addComponent(TxtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(140, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jScrollPane1)
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(17, 17, 17)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(49, 49, 49)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(41, 41, 41)
+                                .addComponent(TxtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, 166, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel4))))
+                .addGap(10, 10, 10)
+                .addComponent(txtSaldoUser, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(55, 55, 55))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(3, 3, 3)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(TxtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(3, 3, 3)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtSaldoUser, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1))))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(TxtFecha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(TxtClaveUsuario, javax.swing.GroupLayout.DEFAULT_SIZE, 32, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(26, 26, 26)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(43, Short.MAX_VALUE))
+                .addContainerGap(26, Short.MAX_VALUE))
         );
 
         pack();
@@ -449,7 +461,7 @@ public class Mensualidades extends javax.swing.JInternalFrame {
             try {
                 Connection con = conexionMySQL.getConnection();
                 ps = con.prepareStatement("select pagos.referencia,alumno.nombre, servicios.Nombre,(s_pagos.costo - s_pagos.anticipo) as Saldo, \n"
-                        + "replace(FORMAT((s_pagos.costo - s_pagos.anticipo)/s_pagos.mensualidad, 2),\",\",\"\") as Mensualidad  from pagos inner join  s_pagos, alumno, servicios where "
+                        + "replace(FORMAT((s_pagos.costo - s_pagos.anticipo)/s_pagos.mensualidad, 2),\",\",\"\") as Mensualidad, alumno.saldo from pagos inner join  s_pagos, alumno, servicios where "
                         + "(pagos.clave_alum = alumno.clave and s_pagos.referencia_p = pagos.referencia and s_pagos.referencia_s = servicios.referencia) and "
                         + "alumno.nombre like '" + valor + "%' and pagos.estatus = 'pendiente';");
                 rs = ps.executeQuery();
@@ -460,6 +472,7 @@ public class Mensualidades extends javax.swing.JInternalFrame {
                     datos[2] = rs.getString(3);
                     datos[3] = rs.getString(4);
                     datos[4] = rs.getString(5);
+                    txtSaldoUser.setText(rs.getString(6));
                     modelo.addRow(datos);
                 }
             } catch (Exception e) {
@@ -504,6 +517,7 @@ public class Mensualidades extends javax.swing.JInternalFrame {
     private javax.swing.JTextField TxtClaveUsuario;
     private com.toedter.calendar.JDateChooser TxtFecha;
     private javax.swing.JButton jButton3;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -513,6 +527,7 @@ public class Mensualidades extends javax.swing.JInternalFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTextField txtSaldoUser;
     private javax.swing.JTextField txtabono;
     private javax.swing.JTextField txtnotas;
     private javax.swing.JTextField txtreferencia;

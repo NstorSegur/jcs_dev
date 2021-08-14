@@ -794,7 +794,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                     Connection con = conexionMySQL.getConnection();
                     ps = con.prepareStatement("INSERT INTO `jcsdb`.`alumno` (`clave`, `nombre`, "
                             + "`fechaNac`, `lugarNac`, `Correo electronico`,`semestre` ,`grupo` ,`periodoF`,`periodoE` , `PaoT`, `Madre`, `domicilio`,"
-                            + " `telefono`, `Emergencias`, `estatus`, `descuento`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+                            + " `telefono`, `Emergencias`, `estatus`, `descuento`, saldo) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
                     ps.setString(1, txtclave.getText());
                     ps.setString(2, txtnombreA.getText());
                     ps.setString(3, ((JTextField) txtfechan.getDateEditor().getUiComponent()).getText());
@@ -881,7 +881,7 @@ public class alumnos extends javax.swing.JInternalFrame {
                     } else {
                         ps.setString(16, txtdescuento.getText());
                     }
-
+                    ps.setString(17, "0");
                     int res = ps.executeUpdate();
                     if (res > 0) {
                         JOptionPane.showMessageDialog(null, "Alumno registrado exitosamente");

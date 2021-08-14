@@ -164,7 +164,6 @@ public class saldo extends javax.swing.JInternalFrame {
                 ps.setString(1, txtSaldo.getText());
                 ps.setString(2, txt_control.getText());
                 ps.execute();
-                this.dispose();
             } else {
                 JOptionPane.showMessageDialog(null, "Ha ingresado datos erroneos");
                 Std_pass.setText(null);
